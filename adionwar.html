@@ -1,0 +1,2913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ADION WAR - Epic Strategy Battle</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #2d1b69 100%);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, #eee, transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+                radial-gradient(1px 1px at 130px 80px, rgba(255,255,255,0.6), transparent);
+            background-repeat: repeat;
+            background-size: 200px 100px;
+            animation: twinkle 4s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.8; }
+            50% { opacity: 1; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 4rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            background-size: 400% 400%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient 3s ease infinite;
+            text-shadow: 0 0 30px rgba(255, 107, 107, 0.5);
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #b0b0ff;
+            margin-top: 10px;
+        }
+
+        .menu-screen {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .user-profile {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .profile-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .user-stats {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #b0b0ff;
+        }
+
+        .coins {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #333;
+            padding: 8px 15px;
+            border-radius: 25px;
+            font-weight: bold;
+        }
+
+        .menu-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .menu-btn {
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .menu-btn:active {
+            transform: translateY(-2px);
+        }
+
+        .game-screen {
+            display: none;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        .left-panel, .right-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .game-board-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .turn-indicator {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(17, 1fr);
+            grid-template-rows: repeat(17, 1fr);
+            width: 540px;
+            height: 540px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 3px solid #495057;
+            border-radius: 12px;
+            position: relative;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            margin: 0 auto;
+        }
+
+        .tile {
+            width: 30px;
+            height: 30px;
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 2px;
+        }
+
+        .tile:hover {
+            background: #f8f9fa;
+            transform: scale(1.02);
+        }
+
+        .tile.valid-move {
+            background: rgba(74, 144, 226, 0.3);
+            border-color: #4a90e2;
+            animation: validMoveGlow 1.5s infinite alternate;
+            cursor: pointer;
+        }
+
+        @keyframes validMoveGlow {
+            0% { box-shadow: 0 0 5px rgba(74, 144, 226, 0.4); }
+            100% { box-shadow: 0 0 15px rgba(74, 144, 226, 0.8); }
+        }
+
+        .tile.jump-move {
+            background: rgba(255, 193, 7, 0.4);
+            border-color: #ffc107;
+            animation: jumpMoveGlow 1.5s infinite alternate;
+        }
+
+        @keyframes jumpMoveGlow {
+            0% { box-shadow: 0 0 5px rgba(255, 193, 7, 0.6); }
+            100% { box-shadow: 0 0 18px rgba(255, 193, 7, 1); }
+        }
+
+        .tile.goal-row-top {
+            background: linear-gradient(180deg, #e3f2fd 0%, #ffffff 100%);
+            border-top: 3px solid #2196f3;
+        }
+
+        .tile.goal-row-bottom {
+            background: linear-gradient(0deg, #ffebee 0%, #ffffff 100%);
+            border-bottom: 3px solid #f44336;
+        }
+
+        .tile.goal-row-top::before {
+            content: "🎯";
+            position: absolute;
+            top: -2px;
+            font-size: 8px;
+            opacity: 0.7;
+        }
+
+        .tile.goal-row-bottom::before {
+            content: "🎯";
+            position: absolute;
+            bottom: -2px;
+            font-size: 8px;
+            opacity: 0.7;
+        }
+
+        .pawn {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            z-index: 10;
+            position: relative;
+        }
+
+        .pawn.player1 {
+            background: linear-gradient(145deg, #f44336 0%, #d32f2f 100%);
+            border: 2px solid #b71c1c;
+        }
+
+        .pawn.player2 {
+            background: linear-gradient(145deg, #2196f3 0%, #1976d2 100%);
+            border: 2px solid #0d47a1;
+        }
+
+        .pawn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .pawn.selected {
+            animation: selectedPawn 1s infinite alternate;
+        }
+
+        @keyframes selectedPawn {
+            0% { transform: scale(1); box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2); }
+            100% { transform: scale(1.15); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); }
+        }
+
+        .wall-slot {
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .wall-slot.horizontal {
+            background: linear-gradient(90deg, transparent 0%, #ced4da 45%, #ced4da 55%, transparent 100%);
+            height: 2px;
+            margin: 1px 0;
+        }
+
+        .wall-slot.vertical {
+            background: linear-gradient(180deg, transparent 0%, #ced4da 45%, #ced4da 55%, transparent 100%);
+            width: 2px;
+            margin: 0 1px;
+        }
+
+        .wall-slot:hover {
+            opacity: 0.8;
+        }
+
+        .wall-slot.horizontal:hover {
+            background: linear-gradient(90deg, transparent 0%, #4a90e2 45%, #4a90e2 55%, transparent 100%);
+            height: 4px;
+        }
+
+        .wall-slot.vertical:hover {
+            background: linear-gradient(180deg, transparent 0%, #4a90e2 45%, #4a90e2 55%, transparent 100%);
+            width: 4px;
+        }
+
+        .wall-slot.preview {
+            animation: wallPreview 0.8s infinite alternate;
+        }
+
+        @keyframes wallPreview {
+            0% { opacity: 0.5; }
+            100% { opacity: 0.9; }
+        }
+
+        .wall-slot.invalid {
+            background: linear-gradient(90deg, transparent 0%, #dc3545 45%, #dc3545 55%, transparent 100%) !important;
+            animation: invalidWall 0.5s ease;
+        }
+
+        @keyframes invalidWall {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.8; }
+        }
+
+        .wall {
+            background: linear-gradient(145deg, #6f42c1 0%, #5a32a3 100%);
+            border: 1px solid #4c2a85;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 5;
+            position: relative;
+        }
+
+        .wall.horizontal {
+            height: 6px;
+            border-radius: 3px;
+            margin: -1px 0;
+        }
+
+        .wall.vertical {
+            width: 6px;
+            border-radius: 3px;
+            margin: 0 -1px;
+        }
+
+        .wall.placed {
+            animation: wallPlaced 0.6s ease;
+        }
+
+        @keyframes wallPlaced {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .intersection {
+            width: 2px;
+            height: 2px;
+            background: #adb5bd;
+            border-radius: 50%;
+        }
+
+        .player-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .player-name {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .walls-remaining {
+            font-size: 1rem;
+            color: #b0b0ff;
+        }
+
+        .chat-container {
+            height: 300px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .chat-message {
+            margin-bottom: 10px;
+            padding: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .chat-input button {
+            padding: 10px 20px;
+            background: #4ecdc4;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .game-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .timer {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            color: #ff6b6b;
+            margin: 10px 0;
+        }
+
+        .victory-celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: celebrationFade 0.5s ease;
+        }
+
+        @keyframes celebrationFade {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .victory-content {
+            text-align: center;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            background-size: 300% 300%;
+            animation: gradient 2s ease infinite;
+            padding: 50px;
+            border-radius: 20px;
+            transform: scale(0);
+            animation: victoryPopup 0.8s ease forwards, gradient 2s ease infinite;
+        }
+
+        @keyframes victoryPopup {
+            0% { transform: scale(0) rotate(0deg); }
+            50% { transform: scale(1.2) rotate(180deg); }
+            100% { transform: scale(1) rotate(360deg); }
+        }
+
+        .victory-title {
+            font-size: 4rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        }
+
+        .victory-subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 30px;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #ff6b6b;
+            animation: confettiFall 3s linear infinite;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .leaderboard {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .leaderboard-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+            color: #4ecdc4;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        .rank {
+            font-weight: bold;
+            color: #ffd700;
+            min-width: 30px;
+        }
+
+        .spectator-count {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 999;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .close-btn {
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
+            margin-top: -10px;
+        }
+
+        @media (max-width: 768px) {
+            .game-screen {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            .game-board {
+                width: 340px;
+                height: 340px;
+                grid-template-columns: repeat(17, 20px);
+                grid-template-rows: repeat(17, 20px);
+            }
+            
+            .tile {
+                width: 20px;
+                height: 20px;
+            }
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .ai-difficulty {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .difficulty-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .difficulty-btn.easy {
+            background: linear-gradient(45deg, #96ceb4, #85c8a6);
+            color: white;
+        }
+
+        .difficulty-btn.medium {
+            background: linear-gradient(45deg, #ffd93d, #ffcd02);
+            color: #333;
+        }
+
+        .difficulty-btn.hard {
+            background: linear-gradient(45deg, #ff6b6b, #ff5252);
+            color: white;
+        }
+
+        .login-form {
+            max-width: 400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #b0b0ff;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 1rem;
+        }
+
+        .room-code {
+            font-family: monospace;
+            font-size: 1.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+            border: 2px dashed #4ecdc4;
+        }
+
+        .copy-btn {
+            background: #4ecdc4;
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        @keyframes tileSelected {
+            0% { transform: scale(1); background: #ffffff; }
+            50% { transform: scale(1.1); background: #e8f5e8; }
+            100% { transform: scale(1); background: #ffffff; }
+        }
+
+        @keyframes moveHighlight {
+            0% { background: rgba(255, 255, 255, 0.1); }
+            50% { background: rgba(255, 255, 255, 0.4); }
+            100% { background: rgba(255, 255, 255, 0.1); }
+        }
+
+        @keyframes slideIn {
+            from { 
+                transform: translateX(100%); 
+                opacity: 0; 
+            }
+            to { 
+                transform: translateX(0); 
+                opacity: 1; 
+            }
+        }
+
+        @keyframes slideOut {
+            from { 
+                transform: translateX(0); 
+                opacity: 1; 
+            }
+            to { 
+                transform: translateX(100%); 
+                opacity: 0; 
+            }
+        }
+
+        .server-info {
+            position: fixed;
+            bottom: 10px;
+            left: 10px;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.5);
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="stars"></div>
+    
+    <!-- Server Info -->
+    <div class="server-info">
+        Server: adion-wall.onrender.com
+    </div>
+    
+    <div class="container">
+        <div class="header">
+            <div class="logo">ADION WAR</div>
+            <div class="subtitle">Epic Strategy Battle Arena</div>
+        </div>
+
+        <!-- Login Screen -->
+        <div id="loginScreen" class="menu-screen">
+            <div class="login-form">
+                <h2 style="text-align: center; margin-bottom: 30px; color: #4ecdc4;">Join the Battle</h2>
+                <div class="form-group">
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" placeholder="Enter your warrior name">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email:</label>
+                    <input type="email" id="email" placeholder="your@email.com">
+                </div>
+                <button class="menu-btn" id="loginBtn">Enter Arena</button>
+                <button class="menu-btn" id="guestBtn" style="margin-top: 10px; opacity: 0.8;">Play as Guest</button>
+            </div>
+        </div>
+
+        <!-- Main Menu Screen -->
+        <div id="menuScreen" class="menu-screen hidden">
+            <div class="user-profile">
+                <div class="profile-info">
+                    <div>
+                        <h3 id="playerName">Warrior</h3>
+                        <div class="coins">
+                            <span>💰</span>
+                            <span id="coinCount">500</span>
+                            <span>Coins</span>
+                        </div>
+                    </div>
+                    <div class="user-stats">
+                        <div class="stat-item">
+                            <div class="stat-value" id="winCount">0</div>
+                            <div class="stat-label">Wins</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="lossCount">0</div>
+                            <div class="stat-label">Losses</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-value" id="rankPosition">Novice</div>
+                            <div class="stat-label">Rank</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="menu-buttons">
+                <button class="menu-btn" id="quickMatchBtn">⚡ Quick Match</button>
+                <button class="menu-btn" id="createRoomBtn">🏠 Create Room</button>
+                <button class="menu-btn" id="joinRoomBtn">🔗 Join Room</button>
+                <button class="menu-btn" id="playAIBtn">🤖 vs Computer</button>
+                <button class="menu-btn" id="spectateBtn">👁️ Spectate</button>
+                <button class="menu-btn" id="tournamentBtn">🏆 Tournament</button>
+            </div>
+
+            <div class="leaderboard">
+                <div class="leaderboard-title">🏆 Global Leaderboard</div>
+                <div id="leaderboardList">
+                    <div class="leaderboard-item">
+                        <span class="rank">1.</span>
+                        <span>StrategyMaster</span>
+                        <span>2,450 pts</span>
+                    </div>
+                    <div class="leaderboard-item">
+                        <span class="rank">2.</span>
+                        <span>WallBuilder</span>
+                        <span>2,380 pts</span>
+                    </div>
+                    <div class="leaderboard-item">
+                        <span class="rank">3.</span>
+                        <span>QuickMover</span>
+                        <span>2,290 pts</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Difficulty Selection -->
+        <div id="aiScreen" class="menu-screen hidden">
+            <h2 style="text-align: center; margin-bottom: 30px;">Choose AI Difficulty</h2>
+            <div class="ai-difficulty">
+                <button class="difficulty-btn easy" data-difficulty="easy">Easy (100 coins)</button>
+                <button class="difficulty-btn medium" data-difficulty="medium">Medium (200 coins)</button>
+                <button class="difficulty-btn hard" data-difficulty="hard">Hard (300 coins)</button>
+            </div>
+            <button class="menu-btn" id="backToMenuBtn">Back to Menu</button>
+        </div>
+
+        <!-- Room Creation Screen -->
+        <div id="roomScreen" class="menu-screen hidden">
+            <h2 style="text-align: center; margin-bottom: 30px;">Room Created!</h2>
+            <div class="room-code">
+                Room Code: <span id="roomCode">ABC123</span>
+                <button class="copy-btn" id="copyCodeBtn">Copy</button>
+            </div>
+            <p style="text-align: center; margin: 20px 0;">Share this code with your friend to join the battle!</p>
+            <div class="spectator-count">
+                <span>👁️ Spectators: <span id="spectatorCount">0</span></span>
+            </div>
+            <button class="menu-btn" id="startGameBtn">Start Game</button>
+            <button class="menu-btn" id="cancelRoomBtn">Cancel</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="gameScreen" class="game-screen">
+            <div class="left-panel">
+                <div class="player-info">
+                    <div class="player-name" style="color: #ff6b6b;">🔴 Player 1</div>
+                    <div class="walls-remaining">Walls: <span id="player1Walls">10</span></div>
+                    <div class="timer" id="player1Timer">30s</div>
+                </div>
+
+                <div class="spectator-count">
+                    <span>👁️ Spectators: <span id="gameSpectators">0</span></span>
+                </div>
+
+                <div class="chat-container" id="chatContainer">
+                    <div class="chat-message">
+                        <strong>System:</strong> Game started! Good luck warriors!
+                    </div>
+                </div>
+
+                <div class="chat-input">
+                    <input type="text" id="chatInput" placeholder="Type message..." maxlength="100">
+                    <button id="sendChatBtn">Send</button>
+                </div>
+            </div>
+
+            <div class="game-board-container">
+                <div class="turn-indicator" id="turnIndicator">
+                    🔴 Player 1's Turn
+                </div>
+
+                <div class="game-board" id="gameBoard">
+                    <!-- Game board will be generated here -->
+                </div>
+
+                <div class="game-controls">
+                    <button class="control-btn" id="undoBtn">↶ Undo</button>
+                    <button class="control-btn" id="hintBtn">💡 Hint (50 coins)</button>
+                    <button class="control-btn" id="surrenderBtn">🏳️ Surrender</button>
+                    <button class="control-btn" id="rematchBtn" style="display: none;">🔄 Rematch</button>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="player-info">
+                    <div class="player-name" style="color: #4ecdc4;">🔵 Player 2</div>
+                    <div class="walls-remaining">Walls: <span id="player2Walls">10</span></div>
+                    <div class="timer" id="player2Timer">30s</div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <h4 style="color: #4ecdc4; margin-bottom: 15px;">Game Stats</h4>
+                    <div style="background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px;">
+                        <div>Moves: <span id="moveCount">0</span></div>
+                        <div>Game Time: <span id="gameTime">00:00</span></div>
+                        <div>Walls Placed: <span id="wallsPlaced">0</span></div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <h4 style="color: #4ecdc4; margin-bottom: 15px;">Controls</h4>
+                    <div style="background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 10px; font-size: 0.9rem;">
+                        <div>• Click to move pawn</div>
+                        <div>• Click between cells for walls</div>
+                        <div>• Reach opposite side to win</div>
+                        <div>• Press ESC to cancel action</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Victory Celebration Modal -->
+    <div class="victory-celebration" id="victoryCelebration">
+        <div class="victory-content">
+            <div class="victory-title" id="victoryTitle">🎉 VICTORY! 🎉</div>
+            <div class="victory-subtitle" id="victorySubtitle">You are the champion!</div>
+            <div style="margin: 20px 0;">
+                <div>💰 Coins Earned: <span id="coinsEarned">100</span></div>
+                <div>🏆 Rank Points: <span id="rankPoints">+25</span></div>
+            </div>
+            <button class="menu-btn" id="playAgainBtn">Play Again</button>
+            <button class="menu-btn" id="backToMenuFromVictory">Back to Menu</button>
+        </div>
+    </div>
+
+    <!-- Generic Modal -->
+    <div class="modal" id="genericModal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeModal">&times;</span>
+            <div id="modalContent">
+                <h3>Modal Title</h3>
+                <p>Modal content goes here.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Socket.IO Client -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    
+    <script>
+        class AdionWarGame {
+            constructor() {
+                this.currentPlayer = 1;
+                this.gameState = 'menu'; // menu, lobby, playing, finished
+                this.players = {
+                    1: { x: 4, y: 0, walls: 10, name: 'Player 1' }, // Player 1 starts at top center
+                    2: { x: 4, y: 8, walls: 10, name: 'Player 2' }  // Player 2 starts at bottom center
+                };
+                this.board = Array(9).fill().map(() => Array(9).fill(0));
+                this.walls = []; // Each wall will have {x, y, orientation}
+                this.gameTime = 0;
+                this.moveCount = 0;
+                this.turnTime = 30;
+                this.turnTimer = null;
+                this.gameTimer = null;
+                this.isOnline = false;
+                this.roomCode = '';
+                this.isSpectator = false;
+                this.moveHistory = [];
+                this.coins = 500;
+                this.userStats = {
+                    wins: 0,
+                    losses: 0,
+                    rank: 'Novice',
+                    points: 0
+                };
+                this.spectators = 0;
+                this.chatMessages = [];
+                this.aiDifficulty = 'medium';
+                this.isPlayingAI = false;
+                
+                // Multiplayer properties
+                this.socket = null;
+                this.playerId = null;
+                this.playerNumber = null;
+                this.currentRoom = null;
+                this.isConnected = false;
+                this.matchmakingStatus = 'idle'; // idle, searching, found
+                this.serverUrl = 'https://adion-wall.onrender.com';
+                
+                this.initializeGame();
+                this.bindEvents();
+                this.createBoard();
+                this.initializeSocket();
+            }
+
+            initializeGame() {
+                // Create confetti
+                for (let i = 0; i < 50; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.backgroundColor = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#ffd93d'][Math.floor(Math.random() * 5)];
+                    confetti.style.animationDelay = Math.random() * 3 + 's';
+                    document.querySelector('.victory-celebration').appendChild(confetti);
+                }
+
+                // Load user data
+                this.loadUserData();
+                this.updateUI();
+            }
+
+            initializeSocket() {
+                try {
+                    console.log('Connecting to server:', this.serverUrl);
+                    
+                    this.socket = io(this.serverUrl, {
+                        transports: ['websocket', 'polling'],
+                        timeout: 20000,
+                        forceNew: true
+                    });
+                    
+                    this.socket.on('connect', () => {
+                        console.log('Connected to Adion War Server!');
+                        this.isConnected = true;
+                        this.playerId = this.socket.id;
+                        this.updateConnectionStatus();
+                        this.showConnectionMessage('Connected to Adion War Server!', 'success');
+                    });
+
+                    this.socket.on('disconnect', (reason) => {
+                        console.log('Disconnected from server:', reason);
+                        this.isConnected = false;
+                        this.updateConnectionStatus();
+                        this.showConnectionMessage('Connection lost. Reconnecting...', 'error');
+                        
+                        if (reason === 'io server disconnect') {
+                            // Server disconnected us, try to reconnect
+                            this.socket.connect();
+                        }
+                    });
+
+                    this.socket.on('connect_error', (error) => {
+                        console.error('Connection error:', error);
+                        this.isConnected = false;
+                        this.updateConnectionStatus();
+                        this.showConnectionMessage('Failed to connect to server', 'error');
+                    });
+
+                    this.socket.on('reconnect', (attemptNumber) => {
+                        console.log('Reconnected after', attemptNumber, 'attempts');
+                        this.isConnected = true;
+                        this.updateConnectionStatus();
+                        this.showConnectionMessage('Reconnected to server!', 'success');
+                    });
+
+                    this.socket.on('reconnect_error', (error) => {
+                        console.error('Reconnection failed:', error);
+                        this.showConnectionMessage('Reconnection failed', 'error');
+                    });
+
+                    // Game events
+                    this.socket.on('game:matchFound', (data) => {
+                        this.handleMatchFound(data);
+                    });
+
+                    this.socket.on('game:started', (data) => {
+                        this.handleGameStarted(data);
+                    });
+
+                    this.socket.on('game:moveUpdate', (data) => {
+                        this.handleMoveUpdate(data);
+                    });
+
+                    this.socket.on('game:ended', (data) => {
+                        this.handleGameEnded(data);
+                    });
+
+                    // Room events
+                    this.socket.on('room:playerJoined', (data) => {
+                        this.handlePlayerJoined(data);
+                    });
+
+                    this.socket.on('room:playerLeft', (data) => {
+                        this.handlePlayerLeft(data);
+                    });
+
+                    this.socket.on('room:spectatorJoined', (data) => {
+                        this.handleSpectatorJoined(data);
+                    });
+
+                    // Chat events
+                    this.socket.on('chat:newMessage', (message) => {
+                        this.handleChatMessage(message);
+                    });
+
+                } catch (error) {
+                    console.error('Failed to initialize socket:', error);
+                    this.showConnectionMessage('Failed to connect to server. Playing in offline mode.', 'error');
+                    this.isConnected = false;
+                    this.updateConnectionStatus();
+                    this.testServerConnection();
+                }
+            }
+
+            async testServerConnection() {
+                try {
+                    const response = await fetch(`${this.serverUrl}/health`);
+                    if (response.ok) {
+                        const health = await response.json();
+                        console.log('Server health check:', health);
+                        this.showConnectionMessage('Server is online but Socket.IO connection failed', 'info');
+                    }
+                } catch (error) {
+                    console.error('Server health check failed:', error);
+                    this.showConnectionMessage('Server appears to be offline', 'error');
+                }
+            }
+
+            bindEvents() {
+                // Login events
+                document.getElementById('loginBtn').addEventListener('click', () => this.login());
+                document.getElementById('guestBtn').addEventListener('click', () => this.loginAsGuest());
+
+                // Menu events
+                document.getElementById('quickMatchBtn').addEventListener('click', () => this.quickMatch());
+                document.getElementById('createRoomBtn').addEventListener('click', () => this.createRoom());
+                document.getElementById('joinRoomBtn').addEventListener('click', () => this.joinRoom());
+                document.getElementById('playAIBtn').addEventListener('click', () => this.showAIScreen());
+                document.getElementById('spectateBtn').addEventListener('click', () => this.spectateGame());
+                document.getElementById('tournamentBtn').addEventListener('click', () => this.showTournament());
+
+                // AI screen events
+                document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                    btn.addEventListener('click', () => this.selectAIDifficulty(btn.dataset.difficulty));
+                });
+                document.getElementById('backToMenuBtn').addEventListener('click', () => this.showMenu());
+
+                // Room events
+                document.getElementById('copyCodeBtn').addEventListener('click', () => this.copyRoomCode());
+                document.getElementById('startGameBtn').addEventListener('click', () => this.startGame());
+                document.getElementById('cancelRoomBtn').addEventListener('click', () => this.showMenu());
+
+                // Game controls
+                document.getElementById('undoBtn').addEventListener('click', () => this.undoMove());
+                document.getElementById('hintBtn').addEventListener('click', () => this.showHint());
+                document.getElementById('surrenderBtn').addEventListener('click', () => this.surrender());
+                document.getElementById('rematchBtn').addEventListener('click', () => this.rematch());
+
+                // Chat
+                document.getElementById('sendChatBtn').addEventListener('click', () => this.sendChat());
+                document.getElementById('chatInput').addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') this.sendChat();
+                });
+
+                // Victory modal
+                document.getElementById('playAgainBtn').addEventListener('click', () => this.playAgain());
+                document.getElementById('backToMenuFromVictory').addEventListener('click', () => this.backToMenu());
+
+                // Generic modal
+                document.getElementById('closeModal').addEventListener('click', () => this.closeModal());
+
+                // Keyboard controls
+                document.addEventListener('keydown', (e) => this.handleKeyboard(e));
+            }
+
+            createBoard() {
+                const board = document.getElementById('gameBoard');
+                board.innerHTML = '';
+
+                // Create 17x17 grid (9x9 tiles + wall slots + intersections)
+                for (let row = 0; row < 17; row++) {
+                    for (let col = 0; col < 17; col++) {
+                        const element = document.createElement('div');
+                        element.dataset.row = row;
+                        element.dataset.col = col;
+
+                        if (row % 2 === 0 && col % 2 === 0) {
+                            // Game tiles (9x9 grid)
+                            const tileX = Math.floor(col / 2);
+                            const tileY = Math.floor(row / 2);
+                            
+                            element.className = 'tile';
+                            element.dataset.x = tileX;
+                            element.dataset.y = tileY;
+                            
+                            // Mark goal rows
+                            if (tileY === 0) {
+                                element.classList.add('goal-row-top');
+                            } else if (tileY === 8) {
+                                element.classList.add('goal-row-bottom');
+                            }
+                            
+                            element.addEventListener('click', () => this.handleTileClick(tileX, tileY));
+                            element.addEventListener('mouseenter', () => this.showMovePreview(tileX, tileY));
+                            element.addEventListener('mouseleave', () => this.hideMovePreview());
+                            
+                        } else if (row % 2 === 1 && col % 2 === 0) {
+                            // Horizontal wall slots
+                            const wallX = Math.floor(col / 2);
+                            const wallY = Math.floor(row / 2);
+                            
+                            element.className = 'wall-slot horizontal';
+                            element.dataset.wallX = wallX;
+                            element.dataset.wallY = wallY;
+                            element.dataset.orientation = 'horizontal';
+                            
+                            element.addEventListener('click', () => this.handleWallClick(wallX, wallY, 'horizontal'));
+                            element.addEventListener('mouseenter', () => this.showWallPreview(wallX, wallY, 'horizontal'));
+                            element.addEventListener('mouseleave', () => this.hideWallPreview());
+                            
+                        } else if (row % 2 === 0 && col % 2 === 1) {
+                            // Vertical wall slots
+                            const wallX = Math.floor(col / 2);
+                            const wallY = Math.floor(row / 2);
+                            
+                            element.className = 'wall-slot vertical';
+                            element.dataset.wallX = wallX;
+                            element.dataset.wallY = wallY;
+                            element.dataset.orientation = 'vertical';
+                            
+                            element.addEventListener('click', () => this.handleWallClick(wallX, wallY, 'vertical'));
+                            element.addEventListener('mouseenter', () => this.showWallPreview(wallX, wallY, 'vertical'));
+                            element.addEventListener('mouseleave', () => this.hideWallPreview());
+                            
+                        } else {
+                            // Intersections (corners where walls meet)
+                            element.className = 'intersection';
+                        }
+
+                        board.appendChild(element);
+                    }
+                }
+
+                this.updateBoard();
+            }
+
+            updateBoard() {
+                // Clear all pawns and highlights
+                document.querySelectorAll('.tile').forEach(tile => {
+                    tile.innerHTML = '';
+                    tile.classList.remove('valid-move', 'jump-move', 'selected');
+                });
+
+                // Place pawns
+                const p1Tile = document.querySelector(`[data-x="${this.players[1].x}"][data-y="${this.players[1].y}"]`);
+                const p2Tile = document.querySelector(`[data-x="${this.players[2].x}"][data-y="${this.players[2].y}"]`);
+                
+                if (p1Tile) {
+                    const pawn1 = document.createElement('div');
+                    pawn1.className = 'pawn player1';
+                    pawn1.textContent = '1';
+                    pawn1.addEventListener('click', () => this.selectPawn(1));
+                    p1Tile.appendChild(pawn1);
+                }
+                
+                if (p2Tile) {
+                    const pawn2 = document.createElement('div');
+                    pawn2.className = 'pawn player2';
+                    pawn2.textContent = '2';
+                    pawn2.addEventListener('click', () => this.selectPawn(2));
+                    p2Tile.appendChild(pawn2);
+                }
+
+                // Update wall counts and turn indicator
+                document.getElementById('player1Walls').textContent = this.players[1].walls;
+                document.getElementById('player2Walls').textContent = this.players[2].walls;
+
+                const indicator = document.getElementById('turnIndicator');
+                if (this.currentPlayer === 1) {
+                    indicator.textContent = '🔴 Player 1\'s Turn';
+                    indicator.style.background = 'linear-gradient(45deg, #f44336, #ff5722)';
+                } else {
+                    indicator.textContent = '🔵 Player 2\'s Turn';
+                    indicator.style.background = 'linear-gradient(45deg, #2196f3, #03a9f4)';
+                }
+
+                // Highlight current player's pawn
+                if (this.gameState === 'playing' && !this.isSpectator) {
+                    const currentPawn = document.querySelector(`.pawn.player${this.currentPlayer}`);
+                    if (currentPawn) {
+                        currentPawn.classList.add('selected');
+                    }
+                }
+            }
+
+            handleTileClick(x, y) {
+                if (this.gameState !== 'playing') return;
+                if (this.isSpectator) return;
+                
+                // For online games, check if it's our turn
+                if (this.isOnline && this.playerNumber !== this.currentPlayer) return;
+
+                if (this.isValidMove(this.currentPlayer, x, y)) {
+                    const moveData = {
+                        type: 'move',
+                        x: x,
+                        y: y
+                    };
+
+                    if (this.isOnline && this.socket) {
+                        // Send move to server
+                        this.socket.emit('game:move', moveData, (response) => {
+                            if (!response || !response.success) {
+                                this.showConnectionMessage(response ? response.error : 'Move failed', 'error');
+                            }
+                        });
+                    } else {
+                        // Local game
+                        this.executeMove(moveData);
+                    }
+                }
+            }
+
+            selectPawn(player) {
+                if (this.gameState !== 'playing' || this.isSpectator) return;
+                if (this.isOnline && player !== this.playerId) return;
+                if (player !== this.currentPlayer) return;
+
+                this.showValidMoves(player);
+            }
+
+            showValidMoves(player) {
+                this.clearHighlights();
+                
+                const currentX = this.players[player].x;
+                const currentY = this.players[player].y;
+                
+                // Check all possible moves
+                const directions = [
+                    { x: 0, y: -1 }, // Up
+                    { x: 0, y: 1 },  // Down
+                    { x: -1, y: 0 }, // Left
+                    { x: 1, y: 0 }   // Right
+                ];
+                
+                for (const dir of directions) {
+                    const newX = currentX + dir.x;
+                    const newY = currentY + dir.y;
+                    
+                    if (this.isValidMove(player, newX, newY)) {
+                        const tile = document.querySelector(`[data-x="${newX}"][data-y="${newY}"]`);
+                        if (tile) {
+                            // Check if this is a jump move
+                            const distance = Math.abs(newX - currentX) + Math.abs(newY - currentY);
+                            if (distance === 2) {
+                                tile.classList.add('jump-move');
+                            } else {
+                                tile.classList.add('valid-move');
+                            }
+                        }
+                    }
+                }
+            }
+
+            showMovePreview(x, y) {
+                if (this.gameState !== 'playing' || this.isSpectator) return;
+                if (this.isOnline && this.currentPlayer !== this.playerId) return;
+                
+                const tile = document.querySelector(`[data-x="${x}"][data-y="${y}"]`);
+                if (tile && this.isValidMove(this.currentPlayer, x, y)) {
+                    tile.style.transform = 'scale(1.05)';
+                    tile.style.boxShadow = '0 4px 12px rgba(74, 144, 226, 0.4)';
+                }
+            }
+
+            hideMovePreview() {
+                document.querySelectorAll('.tile').forEach(tile => {
+                    tile.style.transform = '';
+                    tile.style.boxShadow = '';
+                });
+            }
+
+            showWallPreview(x, y, orientation) {
+                if (this.gameState !== 'playing' || this.isSpectator) return;
+                if (this.isOnline && this.currentPlayer !== this.playerId) return;
+                if (this.players[this.currentPlayer].walls <= 0) return;
+
+                const wallSlot = document.querySelector(`[data-wall-x="${x}"][data-wall-y="${y}"][data-orientation="${orientation}"]`);
+                if (wallSlot) {
+                    if (this.isValidWallPlacement(x, y, orientation)) {
+                        wallSlot.classList.add('preview');
+                        
+                        // Also preview the second part of the wall
+                        if (orientation === 'horizontal') {
+                            const wallSlot2 = document.querySelector(`[data-wall-x="${x + 1}"][data-wall-y="${y}"][data-orientation="${orientation}"]`);
+                            if (wallSlot2) wallSlot2.classList.add('preview');
+                        } else {
+                            const wallSlot2 = document.querySelector(`[data-wall-x="${x}"][data-wall-y="${y + 1}"][data-orientation="${orientation}"]`);
+                            if (wallSlot2) wallSlot2.classList.add('preview');
+                        }
+                    } else {
+                        wallSlot.classList.add('invalid');
+                    }
+                }
+            }
+
+            hideWallPreview() {
+                document.querySelectorAll('.wall-slot').forEach(slot => {
+                    slot.classList.remove('preview', 'invalid');
+                });
+            }
+
+            clearHighlights() {
+                document.querySelectorAll('.tile').forEach(tile => {
+                    tile.classList.remove('valid-move', 'jump-move');
+                });
+                this.hideWallPreview();
+                this.hideMovePreview();
+            }
+
+            handleWallClick(x, y, orientation) {
+                if (this.gameState !== 'playing') return;
+                if (this.isSpectator) return;
+                
+                // For online games, check if it's our turn
+                if (this.isOnline && this.playerNumber !== this.currentPlayer) return;
+                if (this.players[this.currentPlayer].walls <= 0) return;
+
+                if (this.isValidWallPlacement(x, y, orientation)) {
+                    const moveData = {
+                        type: 'wall',
+                        x: x,
+                        y: y,
+                        orientation: orientation
+                    };
+
+                    if (this.isOnline && this.socket) {
+                        // Send wall placement to server
+                        this.socket.emit('game:move', moveData, (response) => {
+                            if (!response || !response.success) {
+                                this.showConnectionMessage(response ? response.error : 'Wall placement failed', 'error');
+                            }
+                        });
+                    } else {
+                        // Local game
+                        this.executeWallPlacement(moveData);
+                    }
+                }
+            }
+
+            isValidMove(player, x, y) {
+                const currentX = this.players[player].x;
+                const currentY = this.players[player].y;
+                
+                // Check boundaries
+                if (x < 0 || x >= 9 || y < 0 || y >= 9) return false;
+                
+                // Check if position is occupied by the same player
+                if (this.players[player].x === x && this.players[player].y === y) return false;
+                
+                const dx = x - currentX;
+                const dy = y - currentY;
+                const distance = Math.abs(dx) + Math.abs(dy);
+                
+                // Basic adjacent move (distance = 1)
+                if (distance === 1) {
+                    // Check if path is blocked by walls
+                    if (this.isPathBlocked(currentX, currentY, x, y)) return false;
+                    
+                    // Check if destination is occupied by opponent
+                    const opponent = player === 1 ? 2 : 1;
+                    if (this.players[opponent].x === x && this.players[opponent].y === y) {
+                        return false; // Cannot move to opponent's position
+                    }
+                    
+                    return true;
+                }
+                
+                // Jump over opponent (distance = 2)
+                if (distance === 2) {
+                    const opponent = player === 1 ? 2 : 1;
+                    const opponentX = this.players[opponent].x;
+                    const opponentY = this.players[opponent].y;
+                    
+                    // Check if opponent is adjacent to current player
+                    const opponentDistance = Math.abs(opponentX - currentX) + Math.abs(opponentY - currentY);
+                    if (opponentDistance !== 1) return false;
+                    
+                    // Check if we're trying to jump over the opponent
+                    const middleX = currentX + dx / 2;
+                    const middleY = currentY + dy / 2;
+                    
+                    if (opponentX === middleX && opponentY === middleY) {
+                        // Direct jump: check if path is clear and destination is empty
+                        if (this.isPathBlocked(currentX, currentY, middleX, middleY)) return false;
+                        if (this.isPathBlocked(middleX, middleY, x, y)) return false;
+                        
+                        // Check if destination is empty
+                        return true;
+                    }
+                }
+                
+                return false;
+            }
+
+            isValidWallPlacement(x, y, orientation) {
+                // Check boundaries - walls span 2 units
+                if (orientation === 'horizontal') {
+                    // Horizontal walls block vertical movement between rows
+                    if (y < 0 || y >= 8 || x < 0 || x >= 8) return false;
+                } else {
+                    // Vertical walls block horizontal movement between columns  
+                    if (x < 0 || x >= 8 || y < 0 || y >= 8) return false;
+                }
+                
+                // Check for existing walls at the same position
+                for (const wall of this.walls) {
+                    if (wall.x === x && wall.y === y && wall.orientation === orientation) {
+                        return false;
+                    }
+                }
+                
+                // Check for intersecting walls
+                if (orientation === 'horizontal') {
+                    // Check if there's a vertical wall that would intersect
+                    for (const wall of this.walls) {
+                        if (wall.orientation === 'vertical') {
+                            // Vertical wall at (wx, wy) blocks horizontal movement at (wx, wy) and (wx, wy+1)
+                            if ((wall.x === x && wall.y === y) || (wall.x === x + 1 && wall.y === y)) {
+                                return false;
+                            }
+                        }
+                    }
+                } else {
+                    // Check if there's a horizontal wall that would intersect
+                    for (const wall of this.walls) {
+                        if (wall.orientation === 'horizontal') {
+                            // Horizontal wall at (wx, wy) blocks vertical movement at (wx, wy) and (wx+1, wy)
+                            if ((wall.x === x && wall.y === y) || (wall.x === x && wall.y === y + 1)) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+                
+                // Most important: Check if wall would completely block any player's path to goal
+                const tempWalls = [...this.walls, { x, y, orientation }];
+                return this.hasPathToGoal(1, tempWalls) && this.hasPathToGoal(2, tempWalls);
+            }
+
+            placeWall(x, y, orientation) {
+                this.walls.push({ x, y, orientation });
+                
+                // Visual representation with animation
+                const wallSlots = [];
+                
+                if (orientation === 'horizontal') {
+                    const wallSlot1 = document.querySelector(`[data-wall-x="${x}"][data-wall-y="${y}"][data-orientation="horizontal"]`);
+                    const wallSlot2 = document.querySelector(`[data-wall-x="${x + 1}"][data-wall-y="${y}"][data-orientation="horizontal"]`);
+                    wallSlots.push(wallSlot1, wallSlot2);
+                } else {
+                    const wallSlot1 = document.querySelector(`[data-wall-x="${x}"][data-wall-y="${y}"][data-orientation="vertical"]`);
+                    const wallSlot2 = document.querySelector(`[data-wall-x="${x}"][data-wall-y="${y + 1}"][data-orientation="vertical"]`);
+                    wallSlots.push(wallSlot1, wallSlot2);
+                }
+                
+                wallSlots.forEach((slot, index) => {
+                    if (slot) {
+                        setTimeout(() => {
+                            slot.classList.add('wall', orientation, 'placed');
+                            slot.classList.remove('wall-slot');
+                        }, index * 100); // Stagger the animation
+                    }
+                });
+                
+                document.getElementById('wallsPlaced').textContent = this.walls.length;
+                
+                // Clear preview
+                this.hideWallPreview();
+            }
+
+            isPathBlocked(x1, y1, x2, y2) {
+                for (const wall of this.walls) {
+                    if (wall.orientation === 'horizontal') {
+                        if (y1 !== y2 && Math.min(y1, y2) === wall.y && 
+                            x1 >= wall.x && x1 <= wall.x + 1) {
+                            return true;
+                        }
+                    } else {
+                        if (x1 !== x2 && Math.min(x1, x2) === wall.x && 
+                            y1 >= wall.y && y1 <= wall.y + 1) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
+            hasPathToGoal(player, walls = this.walls) {
+                // Use proper BFS pathfinding to check if player can reach their goal
+                const targetY = player === 1 ? 8 : 0; // Player 1 goes to bottom, Player 2 goes to top
+                const visited = new Set();
+                const queue = [{ x: this.players[player].x, y: this.players[player].y }];
+                
+                while (queue.length > 0) {
+                    const { x, y } = queue.shift();
+                    const key = `${x},${y}`;
+                    
+                    if (visited.has(key)) continue;
+                    visited.add(key);
+                    
+                    // Check if we reached the goal row
+                    if (y === targetY) return true;
+                    
+                    // Check all four cardinal directions
+                    const moves = [
+                        { x: x, y: y - 1 }, // Up
+                        { x: x, y: y + 1 }, // Down  
+                        { x: x - 1, y: y }, // Left
+                        { x: x + 1, y: y }  // Right
+                    ];
+                    
+                    for (const move of moves) {
+                        if (move.x >= 0 && move.x < 9 && move.y >= 0 && move.y < 9 && 
+                            !visited.has(`${move.x},${move.y}`) &&
+                            !this.isPathBlockedByWalls(x, y, move.x, move.y, walls)) {
+                            queue.push(move);
+                        }
+                    }
+                }
+                return false;
+            }
+
+            isPathBlockedByWalls(x1, y1, x2, y2, walls) {
+                // Check if movement from (x1,y1) to (x2,y2) is blocked by any wall
+                const dx = x2 - x1;
+                const dy = y2 - y1;
+                
+                for (const wall of walls) {
+                    if (wall.orientation === 'horizontal') {
+                        // Horizontal wall blocks vertical movement
+                        if (dy !== 0) { // Moving vertically
+                            const wallY = wall.y;
+                            const wallX1 = wall.x;
+                            const wallX2 = wall.x + 1; // Wall spans 2 units
+                            
+                            // Check if the wall blocks our vertical movement
+                            if (dy > 0) { // Moving down
+                                if (wallY === y1 && x1 >= wallX1 && x1 <= wallX2) {
+                                    return true;
+                                }
+                            } else { // Moving up
+                                if (wallY === y1 - 1 && x1 >= wallX1 && x1 <= wallX2) {
+                                    return true;
+                                }
+                            }
+                        }
+                    } else { // vertical wall
+                        // Vertical wall blocks horizontal movement
+                        if (dx !== 0) { // Moving horizontally
+                            const wallX = wall.x;
+                            const wallY1 = wall.y;
+                            const wallY2 = wall.y + 1; // Wall spans 2 units
+                            
+                            // Check if the wall blocks our horizontal movement
+                            if (dx > 0) { // Moving right
+                                if (wallX === x1 && y1 >= wallY1 && y1 <= wallY2) {
+                                    return true;
+                                }
+                            } else { // Moving left
+                                if (wallX === x1 - 1 && y1 >= wallY1 && y1 <= wallY2) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+
+            checkWin() {
+                // Player 1 wins by reaching bottom row (y = 8)
+                // Player 2 wins by reaching top row (y = 0) 
+                return (this.players[1].y === 8) || (this.players[2].y === 0);
+            }
+
+            nextTurn() {
+                this.currentPlayer = this.currentPlayer === 1 ? 2 : 1;
+                this.resetTurnTimer();
+                
+                if (this.isPlayingAI && this.currentPlayer === 2) {
+                    setTimeout(() => this.makeAIMove(), 1000);
+                }
+            }
+
+            makeAIMove() {
+                if (this.gameState !== 'playing' || this.currentPlayer !== 2) return;
+                
+                const move = this.calculateAIMove();
+                
+                if (move.type === 'move') {
+                    this.players[2].x = move.x;
+                    this.players[2].y = move.y;
+                    this.moveCount++;
+                } else if (move.type === 'wall') {
+                    this.placeWall(move.x, move.y, move.orientation);
+                    this.players[2].walls--;
+                }
+                
+                this.updateGameStats();
+                
+                if (this.checkWin()) {
+                    this.endGame(2);
+                } else {
+                    this.nextTurn();
+                }
+                
+                this.updateBoard();
+            }
+
+            calculateAIMove() {
+                // AI logic based on difficulty
+                const aiPlayer = this.players[2];
+                const humanPlayer = this.players[1];
+                
+                // Easy: Random valid moves
+                if (this.aiDifficulty === 'easy') {
+                    return this.getRandomValidMove();
+                }
+                
+                // Medium: Basic strategy
+                if (this.aiDifficulty === 'medium') {
+                    // Try to move towards goal
+                    if (aiPlayer.y > 0) {
+                        if (this.isValidMove(2, aiPlayer.x, aiPlayer.y - 1)) {
+                            return { type: 'move', x: aiPlayer.x, y: aiPlayer.y - 1 };
+                        }
+                    }
+                    
+                    // If can't move forward, try placing wall to block opponent
+                    if (aiPlayer.walls > 0) {
+                        const wallMove = this.findBlockingWall();
+                        if (wallMove) return wallMove;
+                    }
+                    
+                    return this.getRandomValidMove();
+                }
+                
+                // Hard: Advanced strategy
+                if (this.aiDifficulty === 'hard') {
+                    return this.getOptimalMove();
+                }
+                
+                return this.getRandomValidMove();
+            }
+
+            getRandomValidMove() {
+                const moves = [];
+                const aiPlayer = this.players[2];
+                
+                // Add valid pawn moves
+                const directions = [[0, 1], [0, -1], [1, 0], [-1, 0]];
+                for (const [dx, dy] of directions) {
+                    const newX = aiPlayer.x + dx;
+                    const newY = aiPlayer.y + dy;
+                    if (this.isValidMove(2, newX, newY)) {
+                        moves.push({ type: 'move', x: newX, y: newY });
+                    }
+                }
+                
+                // Add valid wall placements
+                if (aiPlayer.walls > 0) {
+                    for (let x = 0; x < 8; x++) {
+                        for (let y = 0; y < 9; y++) {
+                            if (this.isValidWallPlacement(x, y, 'horizontal')) {
+                                moves.push({ type: 'wall', x, y, orientation: 'horizontal' });
+                            }
+                        }
+                    }
+                    for (let x = 0; x < 9; x++) {
+                        for (let y = 0; y < 8; y++) {
+                            if (this.isValidWallPlacement(x, y, 'vertical')) {
+                                moves.push({ type: 'wall', x, y, orientation: 'vertical' });
+                            }
+                        }
+                    }
+                }
+                
+                return moves[Math.floor(Math.random() * moves.length)] || { type: 'move', x: aiPlayer.x, y: aiPlayer.y };
+            }
+
+            findBlockingWall() {
+                const humanPlayer = this.players[1];
+                
+                // Try to place wall in front of human player
+                if (humanPlayer.y < 8) {
+                    for (let x = Math.max(0, humanPlayer.x - 1); x <= Math.min(7, humanPlayer.x); x++) {
+                        if (this.isValidWallPlacement(x, humanPlayer.y, 'horizontal')) {
+                            return { type: 'wall', x, y: humanPlayer.y, orientation: 'horizontal' };
+                        }
+                    }
+                }
+                
+                return null;
+            }
+
+            getOptimalMove() {
+                // Minimax or similar algorithm would go here
+                // For now, use medium difficulty logic
+                return this.calculateAIMove();
+            }
+
+            endGame(winner) {
+                this.gameState = 'finished';
+                clearInterval(this.turnTimer);
+                clearInterval(this.gameTimer);
+                
+                const isWinner = !this.isOnline || winner === this.playerId;
+                const coinsEarned = isWinner ? (this.isPlayingAI ? 150 : 100) : 50;
+                const rankPoints = isWinner ? 25 : -10;
+                
+                this.coins += coinsEarned;
+                if (isWinner) {
+                    this.userStats.wins++;
+                } else {
+                    this.userStats.losses++;
+                }
+                this.userStats.points += rankPoints;
+                
+                this.updateRank();
+                this.saveUserData();
+                
+                // Show victory celebration
+                document.getElementById('victoryTitle').textContent = isWinner ? '🎉 VICTORY! 🎉' : '💔 DEFEAT 💔';
+                document.getElementById('victorySubtitle').textContent = isWinner ? 
+                    'You conquered the battlefield!' : 'Better luck next time, warrior!';
+                document.getElementById('coinsEarned').textContent = coinsEarned;
+                document.getElementById('rankPoints').textContent = `${rankPoints > 0 ? '+' : ''}${rankPoints}`;
+                
+                document.getElementById('victoryCelebration').style.display = 'flex';
+                
+                // Add victory message to chat
+                this.addChatMessage('System', `🎉 ${this.players[winner].name} wins the battle!`);
+                
+                this.updateUI();
+            }
+
+            resetTurnTimer() {
+                clearInterval(this.turnTimer);
+                this.turnTime = 30;
+                
+                this.turnTimer = setInterval(() => {
+                    this.turnTime--;
+                    document.getElementById(`player${this.currentPlayer}Timer`).textContent = `${this.turnTime}s`;
+                    
+                    if (this.turnTime <= 0) {
+                        // Auto-pass turn or make random move
+                        if (this.isPlayingAI && this.currentPlayer === 2) {
+                            this.makeAIMove();
+                        } else {
+                            this.nextTurn();
+                        }
+                    }
+                }, 1000);
+            }
+
+            updateGameStats() {
+                document.getElementById('moveCount').textContent = this.moveCount;
+                document.getElementById('wallsPlaced').textContent = this.walls.length;
+            }
+
+            startGameTimer() {
+                this.gameTime = 0;
+                this.gameTimer = setInterval(() => {
+                    this.gameTime++;
+                    const minutes = Math.floor(this.gameTime / 60);
+                    const seconds = this.gameTime % 60;
+                    document.getElementById('gameTime').textContent = 
+                        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                }, 1000);
+            }
+
+            // UI Management Methods
+            showScreen(screenId) {
+                document.querySelectorAll('.menu-screen, .game-screen').forEach(screen => {
+                    screen.classList.add('hidden');
+                });
+                document.getElementById(screenId).classList.remove('hidden');
+                
+                if (screenId === 'gameScreen') {
+                    document.getElementById('gameScreen').style.display = 'grid';
+                }
+            }
+
+            login() {
+                const username = document.getElementById('username').value.trim();
+                const email = document.getElementById('email').value.trim();
+                
+                if (!username) {
+                    this.showModal('Error', 'Please enter a username!');
+                    return;
+                }
+                
+                if (this.socket && this.isConnected) {
+                    this.socket.emit('player:login', {
+                        name: username,
+                        email: email,
+                        isGuest: false
+                    }, (response) => {
+                        if (response && response.success) {
+                            this.updatePlayerData(response.player);
+                            this.showConnectionMessage(`Welcome ${response.player.name}!`, 'success');
+                            this.showMenu();
+                        } else {
+                            this.showModal('Login Error', response ? response.error : 'Server connection failed');
+                        }
+                    });
+                } else {
+                    // Offline mode
+                    this.players[1].name = username;
+                    document.getElementById('playerName').textContent = username;
+                    this.showConnectionMessage('Playing in offline mode', 'info');
+                    this.showMenu();
+                }
+            }
+
+            loginAsGuest() {
+                const guestName = 'Guest' + Math.floor(Math.random() * 1000);
+                
+                if (this.socket && this.isConnected) {
+                    this.socket.emit('player:login', {
+                        name: guestName,
+                        email: '',
+                        isGuest: true
+                    }, (response) => {
+                        if (response && response.success) {
+                            this.updatePlayerData(response.player);
+                            this.showConnectionMessage(`Welcome ${response.player.name}!`, 'success');
+                            this.showMenu();
+                        } else {
+                            this.showModal('Login Error', response ? response.error : 'Server connection failed');
+                        }
+                    });
+                } else {
+                    // Offline mode
+                    this.players[1].name = guestName;
+                    document.getElementById('playerName').textContent = guestName;
+                    this.showConnectionMessage('Playing in offline mode', 'info');
+                    this.showMenu();
+                }
+            }
+
+            showMenu() {
+                this.showScreen('menuScreen');
+                this.loadLeaderboard();
+            }
+
+            quickMatch() {
+                if (!this.socket || !this.isConnected) {
+                    this.showModal('Connection Error', 'Not connected to server. Please refresh and try again.');
+                    return;
+                }
+
+                this.matchmakingStatus = 'searching';
+                this.showModal('Searching', 'Looking for worthy opponents...');
+                
+                this.socket.emit('game:quickMatch', (response) => {
+                    if (response && response.success) {
+                        if (response.matched) {
+                            this.matchmakingStatus = 'found';
+                            this.closeModal();
+                            this.showConnectionMessage('Match found!', 'success');
+                        } else if (response.queued) {
+                            this.showModal('Matchmaking', `In queue... Position: ${response.position}\nWaiting for opponent...`);
+                        }
+                    } else {
+                        this.matchmakingStatus = 'idle';
+                        this.closeModal();
+                        this.showModal('Matchmaking Error', response ? response.error : 'Failed to join matchmaking');
+                    }
+                });
+            }
+
+            createRoom() {
+                if (!this.socket || !this.isConnected) {
+                    this.showModal('Connection Error', 'Not connected to server. Please refresh and try again.');
+                    return;
+                }
+
+                this.socket.emit('room:create', (response) => {
+                    if (response && response.success) {
+                        this.currentRoom = response.room;
+                        this.roomCode = response.roomId;
+                        document.getElementById('roomCode').textContent = this.roomCode;
+                        this.showScreen('roomScreen');
+                        this.updateRoomInfo();
+                        this.showConnectionMessage(`Room ${this.roomCode} created!`, 'success');
+                    } else {
+                        this.showModal('Room Creation Error', response ? response.error : 'Failed to create room');
+                    }
+                });
+            }
+
+            joinRoom() {
+                if (!this.socket || !this.isConnected) {
+                    this.showModal('Connection Error', 'Not connected to server. Please refresh and try again.');
+                    return;
+                }
+
+                const code = prompt('Enter room code:');
+                if (code) {
+                    this.socket.emit('room:join', {
+                        roomId: code.toUpperCase(),
+                        asSpectator: false
+                    }, (response) => {
+                        if (response && response.success) {
+                            this.currentRoom = response.room;
+                            this.roomCode = code.toUpperCase();
+                            this.isSpectator = response.isSpectator || false;
+                            
+                            if (this.currentRoom.gameState === 'playing') {
+                                this.showConnectionMessage('Joined ongoing game!', 'success');
+                                this.startOnlineGame();
+                            } else {
+                                document.getElementById('roomCode').textContent = this.roomCode;
+                                this.showScreen('roomScreen');
+                                this.updateRoomInfo();
+                                this.showConnectionMessage(`Joined room ${this.roomCode}!`, 'success');
+                            }
+                        } else {
+                            this.showModal('Join Room Error', response ? response.error : 'Failed to join room');
+                        }
+                    });
+                }
+            }
+
+            showAIScreen() {
+                this.showScreen('aiScreen');
+            }
+
+            selectAIDifficulty(difficulty) {
+                const cost = { easy: 100, medium: 200, hard: 300 }[difficulty];
+                
+                if (this.coins < cost) {
+                    this.showModal('Insufficient Coins', `You need ${cost} coins to play this difficulty!`);
+                    return;
+                }
+                
+                this.coins -= cost;
+                this.aiDifficulty = difficulty;
+                this.isPlayingAI = true;
+                this.players[2].name = `AI (${difficulty.toUpperCase()})`;
+                this.saveUserData();
+                this.updateUI();
+                this.startGame();
+            }
+
+            spectateGame() {
+                if (!this.socket || !this.isConnected) {
+                    this.showModal('Connection Error', 'Not connected to server. Please refresh and try again.');
+                    return;
+                }
+
+                const code = prompt('Enter room code to spectate:');
+                if (code) {
+                    this.socket.emit('room:join', {
+                        roomId: code.toUpperCase(),
+                        asSpectator: true
+                    }, (response) => {
+                        if (response && response.success) {
+                            this.currentRoom = response.room;
+                            this.roomCode = code.toUpperCase();
+                            this.isSpectator = true;
+                            this.isOnline = true;
+                            
+                            if (this.currentRoom.gameState === 'playing') {
+                                this.showConnectionMessage('Now spectating game!', 'success');
+                                this.startOnlineGame();
+                            } else {
+                                this.showModal('Spectating', 'Waiting for game to start...');
+                            }
+                        } else {
+                            this.showModal('Spectate Error', response ? response.error : 'Failed to spectate room');
+                        }
+                    });
+                }
+            }
+
+            showTournament() {
+                this.showModal('Tournament', 'Tournament mode coming soon! Compete against players worldwide for epic prizes!');
+            }
+
+            startOnlineGame() {
+                this.isOnline = true;
+                this.players[2].name = 'Remote Player';
+                this.startGame();
+            }
+
+            startGame() {
+                if (this.isOnline && this.socket && this.currentRoom) {
+                    // For online games, send start request to server
+                    this.socket.emit('game:start', (response) => {
+                        if (!response || !response.success) {
+                            this.showModal('Start Game Error', response ? response.error : 'Failed to start game');
+                        }
+                    });
+                } else {
+                    // Local game
+                    this.gameState = 'playing';
+                    this.showScreen('gameScreen');
+                    this.resetGame();
+                    this.updateBoard();
+                    this.startGameTimer();
+                    this.resetTurnTimer();
+                    
+                    this.addChatMessage('System', 'Battle begins! May the best warrior win!');
+                    
+                    if (this.isSpectator) {
+                        this.addChatMessage('System', 'You are spectating this battle.');
+                    }
+                }
+            }
+
+            startOnlineGame() {
+                this.isOnline = true;
+                this.gameState = 'playing';
+                this.showScreen('gameScreen');
+                this.updateBoard();
+                this.startGameTimer();
+                this.resetTurnTimer();
+                
+                if (this.isSpectator) {
+                    this.addChatMessage('System', 'You are spectating this battle.');
+                }
+            }
+
+            resetGame() {
+                // Reset to proper Quoridor starting positions
+                this.players[1] = { x: 4, y: 0, walls: 10, name: this.players[1].name }; // Top center
+                this.players[2] = { x: 4, y: 8, walls: 10, name: this.players[2].name }; // Bottom center
+                this.currentPlayer = 1;
+                this.walls = [];
+                this.moveCount = 0;
+                this.moveHistory = [];
+                this.gameTime = 0;
+                
+                // Clear walls from board
+                document.querySelectorAll('.wall').forEach(wall => {
+                    wall.classList.remove('wall', 'horizontal', 'vertical', 'placed');
+                    wall.classList.add('wall-slot');
+                });
+                
+                this.updateGameStats();
+            }
+
+            // Game Control Methods
+            undoMove() {
+                if (this.moveHistory.length === 0 || this.isSpectator) return;
+                
+                const lastMove = this.moveHistory.pop();
+                
+                if (lastMove.type === 'move') {
+                    this.players[lastMove.player].x = lastMove.from.x;
+                    this.players[lastMove.player].y = lastMove.from.y;
+                } else if (lastMove.type === 'wall') {
+                    // Remove wall
+                    this.walls = this.walls.filter(wall => 
+                        !(wall.x === lastMove.x && wall.y === lastMove.y && wall.orientation === lastMove.orientation)
+                    );
+                    this.players[lastMove.player].walls++;
+                    
+                    // Remove visual wall
+                    if (lastMove.orientation === 'horizontal') {
+                        const wallElement1 = document.querySelector(`[data-wall-x="${lastMove.x}"][data-wall-y="${lastMove.y}"][data-orientation="horizontal"]`);
+                        const wallElement2 = document.querySelector(`[data-wall-x="${lastMove.x + 1}"][data-wall-y="${lastMove.y}"][data-orientation="horizontal"]`);
+                        if (wallElement1) {
+                            wallElement1.classList.remove('wall', 'horizontal', 'placed');
+                            wallElement1.classList.add('wall-slot');
+                        }
+                        if (wallElement2) {
+                            wallElement2.classList.remove('wall', 'horizontal', 'placed');
+                            wallElement2.classList.add('wall-slot');
+                        }
+                    } else {
+                        const wallElement1 = document.querySelector(`[data-wall-x="${lastMove.x}"][data-wall-y="${lastMove.y}"][data-orientation="vertical"]`);
+                        const wallElement2 = document.querySelector(`[data-wall-x="${lastMove.x}"][data-wall-y="${lastMove.y + 1}"][data-orientation="vertical"]`);
+                        if (wallElement1) {
+                            wallElement1.classList.remove('wall', 'vertical', 'placed');
+                            wallElement1.classList.add('wall-slot');
+                        }
+                        if (wallElement2) {
+                            wallElement2.classList.remove('wall', 'vertical', 'placed');
+                            wallElement2.classList.add('wall-slot');
+                        }
+                    }
+                }
+                
+                this.currentPlayer = lastMove.player;
+                this.moveCount = Math.max(0, this.moveCount - 1);
+                this.updateBoard();
+                this.updateGameStats();
+            }
+
+            showHint() {
+                if (this.coins < 50) {
+                    this.showModal('Insufficient Coins', 'You need 50 coins for a hint!');
+                    return;
+                }
+                
+                this.coins -= 50;
+                this.saveUserData();
+                this.updateUI();
+                
+                // Generate hint
+                const player = this.players[this.currentPlayer];
+                const target = this.currentPlayer === 1 ? 8 : 0;
+                
+                let hint = '';
+                if (Math.abs(player.y - target) > 4) {
+                    hint = 'Focus on advancing towards your goal!';
+                } else if (this.players[this.currentPlayer].walls > 5) {
+                    hint = 'Consider using walls to block your opponent!';
+                } else {
+                    hint = 'Look for the shortest path to victory!';
+                }
+                
+                this.showModal('💡 Strategic Hint', hint);
+                this.addChatMessage('Advisor', `💡 ${hint}`);
+            }
+
+            surrender() {
+                if (confirm('Are you sure you want to surrender?')) {
+                    const winner = this.currentPlayer === 1 ? 2 : 1;
+                    this.endGame(winner);
+                }
+            }
+
+            rematch() {
+                if (this.isOnline) {
+                    this.addChatMessage('System', 'Rematch requested! Waiting for opponent...');
+                    // Simulate opponent accepting
+                    setTimeout(() => {
+                        this.addChatMessage('System', 'Rematch accepted! Starting new battle...');
+                        this.startGame();
+                    }, 2000);
+                } else {
+                    this.startGame();
+                }
+            }
+
+            playAgain() {
+                document.getElementById('victoryCelebration').style.display = 'none';
+                if (this.isPlayingAI) {
+                    this.showAIScreen();
+                } else {
+                    this.startGame();
+                }
+            }
+
+            backToMenu() {
+                document.getElementById('victoryCelebration').style.display = 'none';
+                this.showMenu();
+            }
+
+            // Chat System
+            sendChat() {
+                const input = document.getElementById('chatInput');
+                const message = input.value.trim();
+                
+                if (message && message.length <= 100) {
+                    if (this.isOnline && this.socket) {
+                        // Send to server
+                        this.socket.emit('chat:message', { message }, (response) => {
+                            if (response && response.success) {
+                                input.value = '';
+                            } else {
+                                this.showConnectionMessage(response ? response.error : 'Failed to send message', 'error');
+                            }
+                        });
+                    } else {
+                        // Local chat
+                        this.addChatMessage(this.players[1].name, message);
+                        input.value = '';
+                        
+                        // Simulate opponent response for AI games
+                        if (this.isPlayingAI && Math.random() < 0.3) {
+                            setTimeout(() => {
+                                const responses = [
+                                    'Good move!', 'Nice strategy!', 'Interesting...', 'Well played!',
+                                    'You got me there!', 'Smart!', 'GG!', 'Tough choice...'
+                                ];
+                                this.addChatMessage(this.players[2].name, responses[Math.floor(Math.random() * responses.length)]);
+                            }, 1000 + Math.random() * 2000);
+                        }
+                    }
+                }
+            }
+
+            addChatMessage(sender, message) {
+                const chatContainer = document.getElementById('chatContainer');
+                const messageDiv = document.createElement('div');
+                messageDiv.className = 'chat-message';
+                
+                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                messageDiv.innerHTML = `<strong>${sender}:</strong> ${message} <small style="opacity:0.7">${time}</small>`;
+                
+                chatContainer.appendChild(messageDiv);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                
+                // Keep only last 50 messages
+                while (chatContainer.children.length > 50) {
+                    chatContainer.removeChild(chatContainer.firstChild);
+                }
+            }
+
+            // Utility Methods
+            generateRoomCode() {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                let result = '';
+                for (let i = 0; i < 6; i++) {
+                    result += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return result;
+            }
+
+            copyRoomCode() {
+                const code = document.getElementById('roomCode').textContent;
+                navigator.clipboard.writeText(code).then(() => {
+                    this.showModal('Copied!', `Room code ${code} copied to clipboard!`);
+                });
+            }
+
+            simulateSpectators() {
+                this.spectators = Math.floor(Math.random() * 20) + 1;
+                document.getElementById('spectatorCount').textContent = this.spectators;
+                document.getElementById('gameSpectators').textContent = this.spectators;
+                
+                // Simulate spectator count changes
+                setInterval(() => {
+                    const change = Math.floor(Math.random() * 3) - 1; // -1, 0, or 1
+                    this.spectators = Math.max(0, this.spectators + change);
+                    document.getElementById('spectatorCount').textContent = this.spectators;
+                    document.getElementById('gameSpectators').textContent = this.spectators;
+                }, 10000);
+            }
+
+            updateRank() {
+                const points = this.userStats.points;
+                if (points < 100) this.userStats.rank = 'Novice';
+                else if (points < 300) this.userStats.rank = 'Fighter';
+                else if (points < 600) this.userStats.rank = 'Warrior';
+                else if (points < 1000) this.userStats.rank = 'Champion';
+                else if (points < 1500) this.userStats.rank = 'Master';
+                else this.userStats.rank = 'Grandmaster';
+            }
+
+            updateUI() {
+                document.getElementById('coinCount').textContent = this.coins;
+                document.getElementById('winCount').textContent = this.userStats.wins;
+                document.getElementById('lossCount').textContent = this.userStats.losses;
+                document.getElementById('rankPosition').textContent = this.userStats.rank;
+            }
+
+            loadUserData() {
+                // In a real implementation, this would load from a server
+                try {
+                    const saved = JSON.parse(sessionStorage.getItem('adionWarData') || '{}');
+                    this.coins = saved.coins || 500;
+                    this.userStats = saved.stats || this.userStats;
+                    this.updateRank();
+                } catch (e) {
+                    console.error('Failed to load user data:', e);
+                }
+            }
+
+            saveUserData() {
+                // In a real implementation, this would save to a server
+                const data = {
+                    coins: this.coins,
+                    stats: this.userStats
+                };
+                sessionStorage.setItem('adionWarData', JSON.stringify(data));
+            }
+
+            showModal(title, content) {
+                document.getElementById('modalContent').innerHTML = `
+                    <h3>${title}</h3>
+                    <p>${content}</p>
+                `;
+                document.getElementById('genericModal').style.display = 'flex';
+            }
+
+            closeModal() {
+                document.getElementById('genericModal').style.display = 'none';
+            }
+
+            handleKeyboard(e) {
+                if (this.gameState !== 'playing' || this.isSpectator) return;
+                
+                const player = this.players[this.currentPlayer];
+                let newX = player.x;
+                let newY = player.y;
+                
+                switch (e.key) {
+                    case 'ArrowUp':
+                        newY = Math.max(0, player.y - 1);
+                        break;
+                    case 'ArrowDown':
+                        newY = Math.min(8, player.y + 1);
+                        break;
+                    case 'ArrowLeft':
+                        newX = Math.max(0, player.x - 1);
+                        break;
+                    case 'ArrowRight':
+                        newX = Math.min(8, player.x + 1);
+                        break;
+                    case 'Escape':
+                        this.clearHighlights();
+                        return;
+                    default:
+                        return;
+                }
+                
+                e.preventDefault();
+                if ((newX !== player.x || newY !== player.y) && this.isValidMove(this.currentPlayer, newX, newY)) {
+                    this.handleTileClick(newX, newY);
+                }
+            }
+
+            // Networking Event Handlers
+            handleMatchFound(data) {
+                this.matchmakingStatus = 'found';
+                this.currentRoom = data.gameState;
+                this.roomCode = data.roomId;
+                this.isOnline = true;
+                
+                // Determine our player number
+                this.playerNumber = data.players.findIndex(p => p.id === this.playerId) + 1;
+                
+                this.closeModal();
+                this.addChatMessage('System', 'Match found! Preparing for battle...');
+                
+                // Auto-start the game
+                setTimeout(() => {
+                    this.startOnlineGame();
+                }, 1000);
+            }
+
+            handleGameStarted(data) {
+                this.currentRoom = data.gameState;
+                this.updateGameFromServer(data.gameState);
+                this.gameState = 'playing';
+                this.showScreen('gameScreen');
+                this.startGameTimer();
+                this.resetTurnTimer();
+                this.addChatMessage('System', 'Battle begins! May the best warrior win!');
+            }
+
+            handleMoveUpdate(data) {
+                if (!data || !data.gameState) {
+                    console.error('Invalid move update data received');
+                    return;
+                }
+
+                // Update game state from server
+                this.updateGameFromServer(data.gameState);
+                
+                // Show move animation and update board
+                if (data.move) {
+                    if (data.move.type === 'move') {
+                        // Animate the move
+                        const tile = document.querySelector(`[data-x="${data.move.x}"][data-y="${data.move.y}"]`);
+                        if (tile) {
+                            tile.style.animation = 'tileSelected 0.4s ease';
+                            setTimeout(() => {
+                                tile.style.animation = '';
+                            }, 400);
+                        }
+                        
+                        // Add move to chat
+                        const playerName = this.currentRoom && this.currentRoom.players[data.gameState.currentPlayer === 1 ? 1 : 0] 
+                            ? this.currentRoom.players[data.gameState.currentPlayer === 1 ? 1 : 0].name 
+                            : `Player ${data.gameState.currentPlayer === 1 ? 2 : 1}`;
+                        this.addChatMessage('System', `${playerName} moved to (${data.move.x}, ${data.move.y})`);
+                        
+                    } else if (data.move.type === 'wall') {
+                        // Animate wall placement
+                        this.animateWallPlacement(data.move.x, data.move.y, data.move.orientation);
+                        
+                        // Add wall to chat
+                        const playerName = this.currentRoom && this.currentRoom.players[data.gameState.currentPlayer === 1 ? 1 : 0] 
+                            ? this.currentRoom.players[data.gameState.currentPlayer === 1 ? 1 : 0].name 
+                            : `Player ${data.gameState.currentPlayer === 1 ? 2 : 1}`;
+                        this.addChatMessage('System', `${playerName} placed a ${data.move.orientation} wall`);
+                    }
+                }
+                
+                // Update the board display
+                this.updateBoard();
+                this.updateGameStats();
+            }
+
+            handleGameEnded(data) {
+                if (!data || !data.winner) {
+                    console.error('Invalid game end data received');
+                    return;
+                }
+
+                this.gameState = 'finished';
+                clearInterval(this.turnTimer);
+                clearInterval(this.gameTimer);
+                
+                const isWinner = data.winner === this.playerNumber;
+                const winnerName = this.currentRoom && this.currentRoom.players && this.currentRoom.players[data.winner - 1] 
+                    ? this.currentRoom.players[data.winner - 1].name 
+                    : `Player ${data.winner}`;
+                
+                // Update local stats
+                if (isWinner) {
+                    this.userStats.wins++;
+                    this.coins += 100;
+                } else {
+                    this.userStats.losses++;
+                    this.coins += 25;
+                }
+                
+                this.updateUI();
+                this.saveUserData();
+                
+                // Show victory celebration
+                document.getElementById('victoryTitle').textContent = isWinner ? '🎉 VICTORY! 🎉' : '💔 DEFEAT 💔';
+                document.getElementById('victorySubtitle').textContent = isWinner ? 
+                    'You conquered the battlefield!' : `${winnerName} wins this battle!`;
+                document.getElementById('coinsEarned').textContent = isWinner ? 100 : 25;
+                document.getElementById('rankPoints').textContent = isWinner ? '+25' : '-10';
+                
+                document.getElementById('victoryCelebration').style.display = 'flex';
+                this.addChatMessage('System', `🎉 ${winnerName} wins the battle!`);
+            }
+
+            handlePlayerJoined(data) {
+                this.currentRoom = data.room;
+                this.updateRoomInfo();
+                this.addChatMessage('System', `${data.player.name} joined the room!`);
+                
+                if (data.canStart) {
+                    document.getElementById('startGameBtn').style.display = 'block';
+                }
+            }
+
+            handlePlayerLeft(data) {
+                this.addChatMessage('System', `${data.playerName} left the room${data.disconnected ? ' (disconnected)' : ''}`);
+                
+                if (this.gameState === 'playing' && !data.disconnected) {
+                    this.showModal('Player Left', 'Your opponent left the game. You win by default!');
+                    this.endGame(this.playerNumber);
+                }
+            }
+
+            handleSpectatorJoined(data) {
+                this.spectators = data.spectatorCount;
+                document.getElementById('spectatorCount').textContent = this.spectators;
+                document.getElementById('gameSpectators').textContent = this.spectators;
+            }
+
+            handleChatMessage(message) {
+                this.addChatMessage(message.playerName, message.message);
+            }
+
+            // Helper Methods
+            updatePlayerData(playerData) {
+                this.coins = playerData.coins;
+                this.userStats = playerData.stats;
+                this.players[1].name = playerData.name;
+                document.getElementById('playerName').textContent = playerData.name;
+                this.updateUI();
+            }
+
+            updateGameFromServer(gameState) {
+                if (!gameState || !gameState.board) {
+                    console.error('Invalid game state received from server');
+                    return;
+                }
+
+                try {
+                    this.currentPlayer = gameState.currentPlayer || 1;
+                    
+                    if (gameState.board.player1) {
+                        this.players[1].x = gameState.board.player1.x || 4;
+                        this.players[1].y = gameState.board.player1.y || 0;
+                        this.players[1].walls = gameState.board.player1.walls || 10;
+                    }
+                    
+                    if (gameState.board.player2) {
+                        this.players[2].x = gameState.board.player2.x || 4;
+                        this.players[2].y = gameState.board.player2.y || 8;
+                        this.players[2].walls = gameState.board.player2.walls || 10;
+                    }
+                    
+                    this.walls = gameState.walls || [];
+                    this.moveHistory = gameState.moveHistory || [];
+                    this.updateBoard();
+                } catch (error) {
+                    console.error('Error updating game from server:', error);
+                }
+            }
+
+            updateRoomInfo() {
+                if (this.currentRoom) {
+                    this.spectators = this.currentRoom.spectators.length;
+                    document.getElementById('spectatorCount').textContent = this.spectators;
+                    
+                    // Update player names if available
+                    if (this.currentRoom.players.length >= 2) {
+                        this.players[1].name = this.currentRoom.players[0].name;
+                        this.players[2].name = this.currentRoom.players[1].name;
+                        
+                        // Show start button when room is full
+                        const startBtn = document.getElementById('startGameBtn');
+                        if (startBtn) {
+                            startBtn.style.display = 'block';
+                            startBtn.textContent = 'Start Game (2/2 Players)';
+                        }
+                    } else {
+                        // Hide start button when room is not full
+                        const startBtn = document.getElementById('startGameBtn');
+                        if (startBtn) {
+                            startBtn.style.display = 'none';
+                        }
+                    }
+                    
+                    // Update room status display
+                    const roomStatus = document.querySelector('.room-status') || document.createElement('div');
+                    roomStatus.className = 'room-status';
+                    roomStatus.style.cssText = `
+                        text-align: center;
+                        margin: 15px 0;
+                        padding: 10px;
+                        background: rgba(255, 255, 255, 0.1);
+                        border-radius: 8px;
+                        color: #4ecdc4;
+                    `;
+                    roomStatus.textContent = `Players: ${this.currentRoom.players.length}/2 | Spectators: ${this.currentRoom.spectators.length}`;
+                    
+                    // Add to room screen if not already there
+                    const roomScreen = document.getElementById('roomScreen');
+                    if (roomScreen && !roomScreen.querySelector('.room-status')) {
+                        const roomCodeDiv = roomScreen.querySelector('.room-code');
+                        if (roomCodeDiv) {
+                            roomCodeDiv.parentNode.insertBefore(roomStatus, roomCodeDiv.nextSibling);
+                        }
+                    }
+                }
+            }
+
+            executeMove(moveData, updateServer = true) {
+                // Add move animation
+                const tile = document.querySelector(`[data-x="${moveData.x}"][data-y="${moveData.y}"]`);
+                if (tile) {
+                    tile.style.animation = 'tileSelected 0.4s ease';
+                    setTimeout(() => {
+                        tile.style.animation = '';
+                    }, 400);
+                }
+                
+                this.moveHistory.push({
+                    type: 'move',
+                    player: this.currentPlayer,
+                    from: { x: this.players[this.currentPlayer].x, y: this.players[this.currentPlayer].y },
+                    to: { x: moveData.x, y: moveData.y }
+                });
+                
+                this.players[this.currentPlayer].x = moveData.x;
+                this.players[this.currentPlayer].y = moveData.y;
+                
+                this.moveCount++;
+                this.updateGameStats();
+                
+                if (this.checkWin()) {
+                    this.endGame(this.currentPlayer);
+                } else {
+                    this.nextTurn();
+                }
+                
+                this.updateBoard();
+                this.clearHighlights();
+            }
+
+            executeWallPlacement(moveData, updateServer = true) {
+                this.placeWall(moveData.x, moveData.y, moveData.orientation);
+                this.moveHistory.push({
+                    type: 'wall',
+                    player: this.currentPlayer,
+                    x: moveData.x,
+                    y: moveData.y,
+                    orientation: moveData.orientation
+                });
+                
+                this.players[this.currentPlayer].walls--;
+                this.updateGameStats();
+                this.nextTurn();
+                this.updateBoard();
+            }
+
+            updateConnectionStatus() {
+                // Add connection indicator to UI
+                const indicator = document.querySelector('.connection-status') || document.createElement('div');
+                indicator.className = 'connection-status';
+                indicator.style.cssText = `
+                    position: fixed;
+                    top: 10px;
+                    right: 10px;
+                    padding: 5px 10px;
+                    border-radius: 15px;
+                    font-size: 0.8rem;
+                    z-index: 1000;
+                    transition: all 0.3s ease;
+                    ${this.isConnected ? 
+                        'background: #4caf50; color: white;' : 
+                        'background: #f44336; color: white; cursor: pointer;'
+                    }
+                `;
+                indicator.textContent = this.isConnected ? '🟢 Online' : '🔴 Offline (Click to retry)';
+                
+                if (!document.querySelector('.connection-status')) {
+                    document.body.appendChild(indicator);
+                }
+                
+                // Add click handler for retry
+                if (!this.isConnected) {
+                    indicator.onclick = () => this.retryConnection();
+                } else {
+                    indicator.onclick = null;
+                }
+            }
+
+            retryConnection() {
+                this.showConnectionMessage('Attempting to reconnect...', 'info');
+                if (this.socket) {
+                    this.socket.disconnect();
+                }
+                setTimeout(() => {
+                    this.initializeSocket();
+                }, 1000);
+            }
+
+            showConnectionMessage(message, type = 'info') {
+                const messageDiv = document.createElement('div');
+                messageDiv.style.cssText = `
+                    position: fixed;
+                    top: 50px;
+                    right: 10px;
+                    padding: 10px 15px;
+                    border-radius: 8px;
+                    font-size: 0.9rem;
+                    z-index: 1001;
+                    max-width: 300px;
+                    animation: slideIn 0.3s ease;
+                    ${type === 'success' ? 'background: #4caf50; color: white;' : 
+                      type === 'error' ? 'background: #f44336; color: white;' : 
+                      'background: #2196f3; color: white;'}
+                `;
+                messageDiv.textContent = message;
+                
+                document.body.appendChild(messageDiv);
+                
+                setTimeout(() => {
+                    messageDiv.style.animation = 'slideOut 0.3s ease';
+                    setTimeout(() => {
+                        if (messageDiv.parentNode) {
+                            messageDiv.parentNode.removeChild(messageDiv);
+                        }
+                    }, 300);
+                }, 3000);
+            }
+
+            async loadLeaderboard() {
+                if (!this.isConnected) return;
+                
+                try {
+                    const response = await fetch(`${this.serverUrl}/api/leaderboard`);
+                    if (response.ok) {
+                        const leaderboard = await response.json();
+                        this.updateLeaderboardDisplay(leaderboard);
+                    }
+                } catch (error) {
+                    console.error('Failed to load leaderboard:', error);
+                }
+            }
+
+            updateLeaderboardDisplay(leaderboard) {
+                const leaderboardList = document.getElementById('leaderboardList');
+                if (!leaderboardList || !leaderboard) return;
+                
+                leaderboardList.innerHTML = '';
+                
+                leaderboard.forEach((player, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'leaderboard-item';
+                    item.innerHTML = `
+                        <span class="rank">${index + 1}.</span>
+                        <span>${player.name || 'Anonymous'}</span>
+                        <span>${player.points || 0} pts</span>
+                    `;
+                    leaderboardList.appendChild(item);
+                });
+            }
+        }
+
+        // Initialize the game when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.adionWar = new AdionWarGame();
+            
+            // Add some startup effects
+            setTimeout(() => {
+                const logo = document.querySelector('.logo');
+                if (logo) {
+                    logo.style.animation = 'gradient 3s ease infinite, pulse 2s ease infinite';
+                }
+            }, 1000);
+            
+            // Simulate some online activity
+            setInterval(() => {
+                const spectatorCounts = document.querySelectorAll('#spectatorCount, #gameSpectators');
+                spectatorCounts.forEach(el => {
+                    const current = parseInt(el.textContent) || 0;
+                    const change = Math.floor(Math.random() * 3) - 1;
+                    el.textContent = Math.max(0, current + change);
+                });
+            }, 15000);
+            
+            // Add periodic system messages
+            setInterval(() => {
+                if (window.adionWar && window.adionWar.gameState === 'playing') {
+                    const tips = [
+                        '💡 Tip: Plan your wall placements carefully!',
+                        '⚡ Remember: You can jump over your opponent!',
+                        '🎯 Strategy: Control the center of the board!',
+                        '🛡️ Defense: Block your opponent\'s shortest path!',
+                        '🏃 Speed: Sometimes the fastest route wins!'
+                    ];
+                    const tip = tips[Math.floor(Math.random() * tips.length)];
+                    window.adionWar.addChatMessage('Advisor', tip);
+                }
+            }, 60000);
+
+            // Update leaderboard periodically
+            setInterval(() => {
+                if (window.adionWar && window.adionWar.gameState === 'menu' && window.adionWar.isConnected) {
+                    window.adionWar.loadLeaderboard();
+                }
+            }, 30000);
+        });
+    </script>
+</body>
+</html>
