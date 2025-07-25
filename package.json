@@ -1,7 +1,7 @@
 {
-  "name": "adion-war-server",
+  "name": "adion-war-multiplayer",
   "version": "1.0.0",
-  "description": "Multiplayer Adion War game server with real-time communication",
+  "description": "Epic multiplayer strategy battle game - Adion War",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -11,9 +11,9 @@
   "keywords": [
     "game",
     "multiplayer",
-    "websocket",
     "strategy",
-    "quoridor"
+    "websocket",
+    "realtime"
   ],
   "author": "Adion War Team",
   "license": "MIT",
@@ -26,7 +26,6 @@
     "nodemon": "^3.0.1"
   },
   "engines": {
-    "node": ">=16.0.0",
-    "npm": ">=8.0.0"
+    "node": ">=14.0.0"
   }
 }
