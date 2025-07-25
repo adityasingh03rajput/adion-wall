@@ -50,9 +50,9 @@ class GameRoom {
         this.turnTime = 30;
         this.createdAt = Date.now();
         this.chatMessages = [];
-    }
-
-    addPlayer(player) {
+        this.reconnectionTimers = new Map();
+    }    
+addPlayer(player) {
         if (this.players.length < 2) {
             this.players.push(player);
             return true;
@@ -67,6 +67,12 @@ class GameRoom {
     removePlayer(playerId) {
         this.players = this.players.filter(p => p.id !== playerId);
         this.spectators = this.spectators.filter(p => p.id !== playerId);
+        
+        // Clear any reconnection timer for this player
+        if (this.reconnectionTimers.has(playerId)) {
+            clearTimeout(this.reconnectionTimers.get(playerId));
+            this.reconnectionTimers.delete(playerId);
+        }
     }
 
     isFull() {
@@ -82,7 +88,34 @@ class GameRoom {
         return index === -1 ? null : index + 1;
     }
 
-    makeMove(playerId, moveData) {
+    startReconnectionTimer(playerId) {
+        if (this.reconnectionTimers.has(playerId)) {
+            clearTimeout(this.reconnectionTimers.get(playerId));
+        }
+
+        const timer = setTimeout(() => {
+            // Player didn't reconnect in time, handle forfeit
+            this.handlePlayerForfeit(playerId);
+        }, 120000); // 2 minutes
+
+        this.reconnectionTimers.set(playerId, timer);
+    }
+
+    handlePlayerForfeit(playerId) {
+        const playerNumber = this.getPlayerNumber(playerId);
+        if (playerNumber && this.gameState === 'playing') {
+            const winner = playerNumber === 1 ? 2 : 1;
+            this.gameState = 'finished';
+            
+            // Notify remaining players
+            io.to(this.id).emit('game:ended', {
+                winner: winner,
+                reason: 'forfeit',
+                gameState: this
+            });
+        }
+    }   
+ makeMove(playerId, moveData) {
         const playerNumber = this.getPlayerNumber(playerId);
         if (!playerNumber || playerNumber !== this.currentPlayer) {
             return { success: false, error: 'Not your turn' };
@@ -139,9 +172,8 @@ class GameRoom {
         }
         
         return { success: false, error: 'Invalid move' };
-    }
-
-    isValidMove(player, x, y) {
+    }    isValidM
+ove(player, x, y) {
         const currentPos = this.board[`player${player}`];
         
         // Check boundaries
@@ -221,9 +253,8 @@ class GameRoom {
         // Check if wall would block any player's path to goal
         const tempWalls = [...this.walls, { x, y, orientation }];
         return this.hasPathToGoal(1, tempWalls) && this.hasPathToGoal(2, tempWalls);
-    }
-
-    isPathBlocked(x1, y1, x2, y2) {
+    } 
+   isPathBlocked(x1, y1, x2, y2) {
         for (const wall of this.walls) {
             if (wall.orientation === 'horizontal') {
                 if (y1 !== y2 && Math.min(y1, y2) === wall.y && 
@@ -313,9 +344,8 @@ class GameRoom {
             }
         }
         return false;
-    }
-
-    checkWin(player) {
+    } 
+   checkWin(player) {
         const pos = this.board[`player${player}`];
         return (player === 1 && pos.y === 8) || (player === 2 && pos.y === 0);
     }
@@ -378,14 +408,14 @@ function findOrCreatePlayer(socket, userData) {
             },
             currentRoom: null,
             isGuest: userData.isGuest || false,
-            connectedAt: Date.now()
+            connectedAt: Date.now(),
+            lastSeen: Date.now()
         };
         players.set(socket.id, player);
     }
     return player;
-}
-
-// Socket.IO connection handling
+}// 
+Socket.IO connection handling
 io.on('connection', (socket) => {
     console.log(`Player connected: ${socket.id} from ${socket.handshake.address}`);
 
@@ -477,9 +507,8 @@ io.on('connection', (socket) => {
         } catch (error) {
             callback({ success: false, error: error.message });
         }
-    });
-
-    // Join room
+    }); 
+   // Join room
     socket.on('room:join', (data, callback) => {
         try {
             const { roomId, asSpectator } = data;
@@ -593,6 +622,10 @@ io.on('connection', (socket) => {
                     loser.stats.points = Math.max(0, loser.stats.points - 10);
                     loser.coins += 25;
 
+                    // Update rank based on points
+                    updatePlayerRank(winner);
+                    updatePlayerRank(loser);
+
                     // Save stats
                     if (winner.email) userStats.set(winner.email, winner.stats);
                     if (loser.email) userStats.set(loser.email, loser.stats);
@@ -612,9 +645,8 @@ io.on('connection', (socket) => {
         } catch (error) {
             callback({ success: false, error: error.message });
         }
-    });
-
-    // Chat message
+    });   
+ // Chat message
     socket.on('chat:message', (data, callback) => {
         try {
             const player = players.get(socket.id);
@@ -670,12 +702,43 @@ io.on('connection', (socket) => {
         }
     });
 
+    // Handle player reconnection
+    socket.on('player:reconnect', (userData, callback) => {
+        try {
+            const player = findOrCreatePlayer(socket, userData);
+            const room = gameRooms.get(player.currentRoom);
+            
+            if (room && room.reconnectionTimers.has(socket.id)) {
+                // Cancel reconnection timer
+                clearTimeout(room.reconnectionTimers.get(socket.id));
+                room.reconnectionTimers.delete(socket.id);
+                
+                // Rejoin room
+                socket.join(room.id);
+                
+                // Notify room of reconnection
+                socket.to(room.id).emit('player:reconnected', {
+                    playerId: socket.id,
+                    playerName: player.name
+                });
+                
+                callback({ success: true, room, gameState: room });
+            } else {
+                callback({ success: true, player });
+            }
+        } catch (error) {
+            callback({ success: false, error: error.message });
+        }
+    });
+
     // Disconnect handling
     socket.on('disconnect', (reason) => {
         console.log(`Player disconnected: ${socket.id}, reason: ${reason}`);
         
         const player = players.get(socket.id);
         if (player) {
+            player.lastSeen = Date.now();
+            
             // Remove from matchmaking queue
             const queueIndex = matchmakingQueue.findIndex(p => p.id === socket.id);
             if (queueIndex !== -1) {
@@ -685,25 +748,61 @@ io.on('connection', (socket) => {
             // Handle room cleanup
             const room = gameRooms.get(player.currentRoom);
             if (room) {
-                room.removePlayer(socket.id);
-                
-                // Notify others in room
-                socket.to(room.id).emit('room:playerLeft', {
-                    playerId: socket.id,
-                    playerName: player.name,
-                    disconnected: true
-                });
+                if (room.gameState === 'playing') {
+                    // Start reconnection timer for active games
+                    room.startReconnectionTimer(socket.id);
+                    
+                    // Notify room of disconnection
+                    socket.to(room.id).emit('room:playerDisconnected', {
+                        playerId: socket.id,
+                        playerName: player.name,
+                        reconnectionTime: 120 // 2 minutes
+                    });
+                } else {
+                    // Remove player from waiting rooms immediately
+                    room.removePlayer(socket.id);
+                    
+                    // Notify others in room
+                    socket.to(room.id).emit('room:playerLeft', {
+                        playerId: socket.id,
+                        playerName: player.name,
+                        disconnected: true
+                    });
 
-                // Clean up empty rooms
-                if (room.players.length === 0 && room.spectators.length === 0) {
-                    gameRooms.delete(room.id);
+                    // Clean up empty rooms
+                    if (room.players.length === 0 && room.spectators.length === 0) {
+                        gameRooms.delete(room.id);
+                    }
                 }
             }
 
-            players.delete(socket.id);
+            // Don't delete player immediately to allow reconnection
+            setTimeout(() => {
+                if (players.has(socket.id)) {
+                    const p = players.get(socket.id);
+                    if (Date.now() - p.lastSeen > 300000) { // 5 minutes
+                        players.delete(socket.id);
+                    }
+                }
+            }, 300000);
         }
     });
-});
+});// H
+elper function to update player rank
+function updatePlayerRank(player) {
+    const points = player.stats.points;
+    if (points >= 1000) {
+        player.stats.rank = 'Master';
+    } else if (points >= 500) {
+        player.stats.rank = 'Expert';
+    } else if (points >= 200) {
+        player.stats.rank = 'Advanced';
+    } else if (points >= 50) {
+        player.stats.rank = 'Intermediate';
+    } else {
+        player.stats.rank = 'Novice';
+    }
+}
 
 // REST API endpoints
 app.get('/api/stats', (req, res) => {
@@ -727,7 +826,7 @@ app.get('/api/leaderboard', (req, res) => {
     try {
         const leaderboard = Array.from(userStats.entries())
             .map(([email, stats]) => ({
-                name: email ? email.replace(/(.{2}).*(@.*)/, '$1***$2') : 'Anonymous', // Mask email for privacy
+                name: email ? email.replace(/(.{2}).*(@.*)/, '$1***$2') : 'Anonymous',
                 ...stats
             }))
             .sort((a, b) => b.points - a.points)
@@ -760,30 +859,39 @@ app.get('/api/rooms', (req, res) => {
 
 // Serve the main HTML file
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'adionwar - Copy.html'));
+    res.sendFile(path.join(__dirname, 'adionwar-multiplayer.html'));
 });
 
-// Health check endpoint for Render.com
+// Health check endpoint
 app.get('/health', (req, res) => {
     res.status(200).json({ 
         status: 'healthy', 
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
         players: players.size,
-        rooms: gameRooms.size
+        rooms: gameRooms.size,
+        version: '1.0.0'
     });
 });
 
-// Cleanup old rooms periodically
+// Cleanup old rooms and players periodically
 setInterval(() => {
     const now = Date.now();
     const roomsToDelete = [];
+    const playersToDelete = [];
     
+    // Clean up old rooms
     for (const [roomId, room] of gameRooms.entries()) {
-        // Delete rooms older than 2 hours with no activity
         if (now - room.createdAt > 2 * 60 * 60 * 1000 && 
             room.players.length === 0 && room.spectators.length === 0) {
             roomsToDelete.push(roomId);
+        }
+    }
+    
+    // Clean up disconnected players
+    for (const [playerId, player] of players.entries()) {
+        if (now - player.lastSeen > 5 * 60 * 1000) { // 5 minutes
+            playersToDelete.push(playerId);
         }
     }
     
@@ -791,9 +899,13 @@ setInterval(() => {
         gameRooms.delete(roomId);
         console.log(`Cleaned up old room: ${roomId}`);
     });
-}, 30 * 60 * 1000); // Run every 30 minutes
-
-const PORT = process.env.PORT || 3000;
+    
+    playersToDelete.forEach(playerId => {
+        players.delete(playerId);
+        console.log(`Cleaned up disconnected player: ${playerId}`);
+    });
+}, 30 * 60 * 1000); // Run every 30 minutescon
+st PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || '0.0.0.0';
 
 // Global error handlers
@@ -819,4 +931,5 @@ server.listen(PORT, HOST, () => {
     console.log(`🎮 Adion War Server running on ${HOST}:${PORT}`);
     console.log(`🌐 Game available at: http://localhost:${PORT}`);
     console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`🚀 Server started at: ${new Date().toISOString()}`);
 });
