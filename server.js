@@ -114,8 +114,9 @@ addPlayer(player) {
                 gameState: this
             });
         }
-    }   
- makeMove(playerId, moveData) {
+    }
+
+    makeMove(playerId, moveData) {
         const playerNumber = this.getPlayerNumber(playerId);
         if (!playerNumber || playerNumber !== this.currentPlayer) {
             return { success: false, error: 'Not your turn' };
@@ -172,8 +173,9 @@ addPlayer(player) {
         }
         
         return { success: false, error: 'Invalid move' };
-    }    isValidM
-ove(player, x, y) {
+    }
+
+    isValidMove(player, x, y) {
         const currentPos = this.board[`player${player}`];
         
         // Check boundaries
@@ -253,8 +255,9 @@ ove(player, x, y) {
         // Check if wall would block any player's path to goal
         const tempWalls = [...this.walls, { x, y, orientation }];
         return this.hasPathToGoal(1, tempWalls) && this.hasPathToGoal(2, tempWalls);
-    } 
-   isPathBlocked(x1, y1, x2, y2) {
+    }
+
+    isPathBlocked(x1, y1, x2, y2) {
         for (const wall of this.walls) {
             if (wall.orientation === 'horizontal') {
                 if (y1 !== y2 && Math.min(y1, y2) === wall.y && 
@@ -344,8 +347,9 @@ ove(player, x, y) {
             }
         }
         return false;
-    } 
-   checkWin(player) {
+    }
+
+    checkWin(player) {
         const pos = this.board[`player${player}`];
         return (player === 1 && pos.y === 8) || (player === 2 && pos.y === 0);
     }
@@ -414,8 +418,9 @@ function findOrCreatePlayer(socket, userData) {
         players.set(socket.id, player);
     }
     return player;
-}// 
-Socket.IO connection handling
+}
+
+// Socket.IO connection handling
 io.on('connection', (socket) => {
     console.log(`Player connected: ${socket.id} from ${socket.handshake.address}`);
 
@@ -787,8 +792,9 @@ io.on('connection', (socket) => {
             }, 300000);
         }
     });
-});// H
-elper function to update player rank
+});
+
+// Helper function to update player rank
 function updatePlayerRank(player) {
     const points = player.stats.points;
     if (points >= 1000) {
@@ -904,8 +910,9 @@ setInterval(() => {
         players.delete(playerId);
         console.log(`Cleaned up disconnected player: ${playerId}`);
     });
-}, 30 * 60 * 1000); // Run every 30 minutescon
-st PORT = process.env.PORT || 3000;
+}, 30 * 60 * 1000); // Run every 30 minutes
+
+const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || '0.0.0.0';
 
 // Global error handlers
