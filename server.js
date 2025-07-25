@@ -8,16 +8,28 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
     cors: {
-        origin: "*",
+        origin: process.env.NODE_ENV === 'production' 
+            ? ["https://adion-wall.onrender.com", "http://localhost:3000", "file://"] 
+            : "*",
         methods: ["GET", "POST"],
-        credentials: true
+        credentials: true,
+        allowedHeaders: ["*"]
     },
     transports: ['websocket', 'polling'],
-    allowEIO3: true
+    allowEIO3: true,
+    pingTimeout: 60000,
+    pingInterval: 25000
 });
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: process.env.NODE_ENV === 'production' 
+        ? ["https://adion-wall.onrender.com", "http://localhost:3000", "file://", "null"] 
+        : "*",
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}));
 app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
@@ -863,9 +875,27 @@ app.get('/api/rooms', (req, res) => {
     }
 });
 
-// Serve the main HTML file
+// Serve the main HTML file only in development
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'adionwar-multiplayer.html'));
+    if (process.env.NODE_ENV === 'production') {
+        // In production, just return API info instead of serving HTML
+        res.json({
+            name: 'Adion War Multiplayer Server',
+            version: '1.0.0',
+            status: 'running',
+            endpoints: {
+                health: '/health',
+                stats: '/api/stats',
+                leaderboard: '/api/leaderboard',
+                rooms: '/api/rooms'
+            },
+            websocket: 'Socket.IO enabled',
+            message: 'Connect your client to this server using Socket.IO'
+        });
+    } else {
+        // In development, serve the HTML file
+        res.sendFile(path.join(__dirname, 'adionwar-multiplayer.html'));
+    }
 });
 
 // Health check endpoint
