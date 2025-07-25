@@ -5,8 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ADION WAR - Multiplayer Strategy Battle</title>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1094886934592913"
-        crossorigin="anonymous"></script>
     <style>
         * {
             margin: 0;
@@ -267,33 +265,18 @@
             grid-template-rows: repeat(17, 1fr);
             width: 540px;
             height: 540px;
-            background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
-            border: 4px solid #495057;
-            border-radius: 15px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border: 3px solid #495057;
+            border-radius: 12px;
             position: relative;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
             margin: 0 auto;
-            transform: perspective(1000px) rotateX(5deg) rotateY(-2deg);
-            box-shadow:
-                0 20px 40px rgba(0, 0, 0, 0.3),
-                0 10px 20px rgba(0, 0, 0, 0.2),
-                inset 0 2px 4px rgba(255, 255, 255, 0.3),
-                inset 0 -2px 4px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .game-board:hover {
-            transform: perspective(1000px) rotateX(3deg) rotateY(-1deg) scale(1.02);
-            box-shadow:
-                0 25px 50px rgba(0, 0, 0, 0.4),
-                0 15px 30px rgba(0, 0, 0, 0.3),
-                inset 0 2px 4px rgba(255, 255, 255, 0.4),
-                inset 0 -2px 4px rgba(0, 0, 0, 0.15);
         }
 
         .tile {
             width: 30px;
             height: 30px;
-            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 50%, #e9ecef 100%);
+            background: #ffffff;
             border: 1px solid #dee2e6;
             display: flex;
             align-items: center;
@@ -301,100 +284,44 @@
             position: relative;
             cursor: pointer;
             transition: all 0.2s ease;
-            border-radius: 4px;
-            box-shadow:
-                inset 0 1px 2px rgba(255, 255, 255, 0.8),
-                inset 0 -1px 2px rgba(0, 0, 0, 0.1),
-                0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 2px;
         }
 
         .tile:hover {
-            background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
-            transform: translateY(-1px) scale(1.02);
-            box-shadow:
-                inset 0 1px 3px rgba(255, 255, 255, 0.9),
-                inset 0 -1px 3px rgba(0, 0, 0, 0.15),
-                0 4px 8px rgba(0, 0, 0, 0.15);
-        }
-
-        .tile:active {
-            transform: translateY(0px) scale(0.98);
-            box-shadow:
-                inset 0 1px 2px rgba(255, 255, 255, 0.6),
-                inset 0 -1px 2px rgba(0, 0, 0, 0.2),
-                0 1px 2px rgba(0, 0, 0, 0.1);
+            background: #f8f9fa;
+            transform: scale(1.02);
         }
 
         .tile.valid-move {
-            background: linear-gradient(145deg, rgba(74, 144, 226, 0.4) 0%, rgba(74, 144, 226, 0.2) 100%);
-            border: 2px solid #4a90e2;
+            background: rgba(74, 144, 226, 0.3);
+            border-color: #4a90e2;
             animation: validMoveGlow 1.5s infinite alternate;
             cursor: pointer;
-            transform: translateY(-1px);
         }
 
         @keyframes validMoveGlow {
             0% {
-                box-shadow:
-                    0 4px 8px rgba(74, 144, 226, 0.4),
-                    0 2px 4px rgba(0, 0, 0, 0.2),
-                    inset 0 1px 2px rgba(255, 255, 255, 0.4);
+                box-shadow: 0 0 5px rgba(74, 144, 226, 0.4);
             }
 
             100% {
-                box-shadow:
-                    0 8px 16px rgba(74, 144, 226, 0.6),
-                    0 4px 8px rgba(0, 0, 0, 0.3),
-                    inset 0 1px 3px rgba(255, 255, 255, 0.5);
-                transform: translateY(-2px);
+                box-shadow: 0 0 15px rgba(74, 144, 226, 0.8);
             }
         }
 
         .tile.goal-row-top {
-            background: linear-gradient(180deg, #e3f2fd 0%, #bbdefb 50%, #ffffff 100%);
-            border-top: 4px solid #2196f3;
-            box-shadow:
-                inset 0 2px 4px rgba(33, 150, 243, 0.3),
-                inset 0 -1px 2px rgba(0, 0, 0, 0.1),
-                0 2px 4px rgba(33, 150, 243, 0.2);
-            position: relative;
-        }
-
-        .tile.goal-row-top::before {
-            content: "🎯";
-            position: absolute;
-            top: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 10px;
-            opacity: 0.8;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(180deg, #e3f2fd 0%, #ffffff 100%);
+            border-top: 3px solid #2196f3;
         }
 
         .tile.goal-row-bottom {
-            background: linear-gradient(0deg, #ffebee 0%, #ffcdd2 50%, #ffffff 100%);
-            border-bottom: 4px solid #f44336;
-            box-shadow:
-                inset 0 -2px 4px rgba(244, 67, 54, 0.3),
-                inset 0 1px 2px rgba(0, 0, 0, 0.1),
-                0 2px 4px rgba(244, 67, 54, 0.2);
-            position: relative;
-        }
-
-        .tile.goal-row-bottom::before {
-            content: "🎯";
-            position: absolute;
-            bottom: -8px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 10px;
-            opacity: 0.8;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(0deg, #ffebee 0%, #ffffff 100%);
+            border-bottom: 3px solid #f44336;
         }
 
         .pawn {
-            width: 22px;
-            height: 22px;
+            width: 20px;
+            height: 20px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -402,43 +329,27 @@
             font-weight: bold;
             font-size: 12px;
             color: white;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
             transition: all 0.3s ease;
             cursor: pointer;
             z-index: 10;
             position: relative;
-            transform: translateY(-2px);
         }
 
         .pawn.player1 {
-            background: radial-gradient(circle at 30% 30%, #ff6b6b 0%, #f44336 50%, #d32f2f 100%);
+            background: linear-gradient(145deg, #f44336 0%, #d32f2f 100%);
             border: 2px solid #b71c1c;
-            box-shadow:
-                0 6px 12px rgba(244, 67, 54, 0.4),
-                0 3px 6px rgba(0, 0, 0, 0.3),
-                inset 0 1px 2px rgba(255, 255, 255, 0.3),
-                inset 0 -1px 2px rgba(0, 0, 0, 0.2);
         }
 
         .pawn.player2 {
-            background: radial-gradient(circle at 30% 30%, #64b5f6 0%, #2196f3 50%, #1976d2 100%);
+            background: linear-gradient(145deg, #2196f3 0%, #1976d2 100%);
             border: 2px solid #0d47a1;
-            box-shadow:
-                0 6px 12px rgba(33, 150, 243, 0.4),
-                0 3px 6px rgba(0, 0, 0, 0.3),
-                inset 0 1px 2px rgba(255, 255, 255, 0.3),
-                inset 0 -1px 2px rgba(0, 0, 0, 0.2);
         }
 
         .pawn:hover {
-            transform: translateY(-4px) scale(1.1);
-            box-shadow:
-                0 8px 16px rgba(0, 0, 0, 0.4),
-                0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .pawn:active {
-            transform: translateY(-1px) scale(1.05);
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
         .pawn.selected {
@@ -526,38 +437,24 @@
         }
 
         .wall {
-            background: linear-gradient(145deg, #8e24aa 0%, #6f42c1 50%, #5a32a3 100%);
+            background: linear-gradient(145deg, #6f42c1 0%, #5a32a3 100%);
             border: 2px solid #4c2a85;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
             position: relative;
             z-index: 10;
             animation: wallPlaced 0.4s ease;
-            box-shadow:
-                0 4px 8px rgba(111, 66, 193, 0.4),
-                0 2px 4px rgba(0, 0, 0, 0.3),
-                inset 0 1px 2px rgba(255, 255, 255, 0.2),
-                inset 0 -1px 2px rgba(0, 0, 0, 0.3);
         }
 
         .wall.horizontal {
-            height: 10px;
+            height: 8px;
             width: 100%;
-            border-radius: 5px;
-            transform: translateY(-1px);
+            border-radius: 4px;
         }
 
         .wall.vertical {
-            width: 10px;
+            width: 8px;
             height: 100%;
-            border-radius: 5px;
-            transform: translateX(-1px);
-        }
-
-        .wall:hover {
-            box-shadow:
-                0 6px 12px rgba(111, 66, 193, 0.5),
-                0 3px 6px rgba(0, 0, 0, 0.4),
-                inset 0 1px 3px rgba(255, 255, 255, 0.3),
-                inset 0 -1px 3px rgba(0, 0, 0, 0.4);
+            border-radius: 4px;
         }
 
         @keyframes wallPlaced {
@@ -667,48 +564,19 @@
         }
 
         .control-btn {
-            padding: 12px 24px;
-            background: linear-gradient(145deg, #667eea 0%, #764ba2 100%);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
+            padding: 10px 20px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border: none;
+            border-radius: 8px;
             color: white;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.2s ease;
-            position: relative;
-            box-shadow:
-                0 4px 8px rgba(102, 126, 234, 0.3),
-                0 2px 4px rgba(0, 0, 0, 0.2),
-                inset 0 1px 2px rgba(255, 255, 255, 0.3),
-                inset 0 -1px 2px rgba(0, 0, 0, 0.2);
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
         }
 
         .control-btn:hover {
-            transform: translateY(-3px);
-            box-shadow:
-                0 6px 12px rgba(102, 126, 234, 0.4),
-                0 3px 6px rgba(0, 0, 0, 0.3),
-                inset 0 1px 3px rgba(255, 255, 255, 0.4),
-                inset 0 -1px 3px rgba(0, 0, 0, 0.3);
-        }
-
-        .control-btn:active {
-            transform: translateY(-1px);
-            box-shadow:
-                0 2px 4px rgba(102, 126, 234, 0.3),
-                0 1px 2px rgba(0, 0, 0, 0.2),
-                inset 0 1px 2px rgba(255, 255, 255, 0.2),
-                inset 0 -1px 2px rgba(0, 0, 0, 0.3);
-        }
-
-        .control-btn.active {
-            background: linear-gradient(145deg, #4ecdc4 0%, #44a08d 100%);
-            box-shadow:
-                0 4px 8px rgba(78, 205, 196, 0.4),
-                0 2px 4px rgba(0, 0, 0, 0.2),
-                inset 0 1px 2px rgba(255, 255, 255, 0.4),
-                inset 0 -1px 2px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
         }
 
         .room-code {
@@ -856,64 +724,55 @@
             }
         }
 
-        /* Reconnection Timer Modal */
-        .reconnection-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: none;
+        /* Ad Banner Styles */
+        .ad-banner {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 10px;
+            margin: 20px auto;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-height: 120px;
+            display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 1500;
-            backdrop-filter: blur(5px);
+            position: relative;
+            overflow: hidden;
         }
 
-        .reconnection-content {
-            background: linear-gradient(145deg, #1a1a3e 0%, #2d1b69 100%);
-            padding: 40px;
-            border-radius: 20px;
-            text-align: center;
-            max-width: 450px;
-            width: 90%;
-            border: 2px solid #ff9800;
-            box-shadow:
-                0 20px 40px rgba(0, 0, 0, 0.5),
-                0 10px 20px rgba(255, 152, 0, 0.3),
-                inset 0 2px 4px rgba(255, 255, 255, 0.1);
+        .ad-banner.top {
+            max-width: 728px;
+            height: 90px;
+            margin-bottom: 30px;
         }
 
-        .reconnection-timer {
-            font-size: 3rem;
-            font-weight: bold;
-            color: #ff9800;
-            margin: 20px 0;
-            text-shadow: 0 0 20px rgba(255, 152, 0, 0.5);
-            animation: timerPulse 1s infinite;
-        }
-
-        @keyframes timerPulse {
-
-            0%,
-            100% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.1);
-            }
-        }
-
-        .reconnection-options {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
+        .ad-banner.bottom {
+            max-width: 728px;
+            height: 90px;
             margin-top: 30px;
         }
 
-        .ai-takeover-modal {
+        .ad-banner.sidebar {
+            max-width: 300px;
+            height: 250px;
+            margin: 20px 0;
+        }
+
+        .ad-refresh-indicator {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            z-index: 10;
+        }
+
+        /* Disconnect Timer Modal */
+        .disconnect-timer-modal {
             position: fixed;
             top: 0;
             left: 0;
@@ -923,171 +782,63 @@
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 1600;
-            backdrop-filter: blur(10px);
+            z-index: 1001;
+            animation: fadeIn 0.3s ease;
         }
 
-        .ai-takeover-content {
-            background: linear-gradient(145deg, #4caf50 0%, #388e3c 100%);
+        .disconnect-timer-content {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
             padding: 40px;
             border-radius: 20px;
             text-align: center;
-            max-width: 400px;
+            max-width: 500px;
             width: 90%;
-            box-shadow:
-                0 20px 40px rgba(0, 0, 0, 0.5),
-                0 10px 20px rgba(76, 175, 80, 0.3);
-            color: white;
+            animation: slideInScale 0.5s ease;
         }
 
-        /* Keyboard Feedback Animations */
-        @keyframes keyboardFeedbackShow {
-            0% {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(0.5);
-            }
-
-            50% {
-                transform: translate(-50%, -50%) scale(1.1);
-            }
-
-            100% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1);
-            }
-        }
-
-        @keyframes keyboardFeedbackHide {
-            0% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1);
-            }
-
-            100% {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(0.8);
-            }
-        }
-
-        /* Enhanced 3D Effects for Game Elements */
-        .game-board-container {
-            perspective: 1200px;
-            transform-style: preserve-3d;
-        }
-
-        .turn-indicator {
-            background: linear-gradient(145deg, #ff6b6b 0%, #4ecdc4 100%);
-            padding: 15px 30px;
-            border-radius: 25px;
-            font-size: 1.2rem;
+        .disconnect-timer-title {
+            font-size: 2rem;
             font-weight: bold;
-            text-align: center;
-            animation: pulse 2s infinite;
-            box-shadow:
-                0 8px 16px rgba(255, 107, 107, 0.3),
-                0 4px 8px rgba(0, 0, 0, 0.2),
-                inset 0 2px 4px rgba(255, 255, 255, 0.3),
-                inset 0 -2px 4px rgba(0, 0, 0, 0.2);
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            transform: translateY(-2px);
-        }
-
-        /* Ad Banner Styles */
-        .ad-banner {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 15px;
-            margin: 20px 0;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            min-height: 100px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .ad-banner::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            animation: adShimmer 3s infinite;
-        }
-
-        @keyframes adShimmer {
-            0% {
-                left: -100%;
-            }
-
-            100% {
-                left: 100%;
-            }
-        }
-
-        .ad-banner-game-top {
-            position: fixed;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 500;
-            max-width: 728px;
-            width: 90%;
-        }
-
-        .ad-banner-game-bottom {
-            position: fixed;
-            bottom: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 500;
-            max-width: 728px;
-            width: 90%;
-        }
-
-        .ad-rotating {
-            transition: opacity 0.5s ease-in-out;
-        }
-
-        .ad-rotating.fade-out {
-            opacity: 0;
-        }
-
-        .ad-label {
-            position: absolute;
-            top: 3px;
-            right: 8px;
-            font-size: 0.6rem;
-            color: rgba(255, 255, 255, 0.5);
-            background: rgba(0, 0, 0, 0.3);
-            padding: 1px 4px;
-            border-radius: 2px;
-        }
-
-        .ad-close-btn {
-            position: absolute;
-            top: 5px;
-            right: 30px;
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
+            margin-bottom: 20px;
             color: white;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
 
-        .ad-close-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+        .disconnect-countdown {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #ffd700;
+            margin: 20px 0;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+            animation: pulse 1s infinite;
+        }
+
+        .continue-with-ai-section {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideInScale {
+            from {
+                transform: scale(0.5) translateY(-50px);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1) translateY(0);
+                opacity: 1;
+            }
         }
 
         @media (max-width: 768px) {
@@ -1128,78 +879,16 @@
                 width: 6px;
             }
 
-            .ad-banner-game-top,
-            .ad-banner-game-bottom {
-                width: 95%;
-                min-height: 80px;
-            }
-        }
-
-        /* Ad Banner Styles for Game */
-        .game-ad-banner {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(5px);
-            border-radius: 10px;
-            padding: 15px;
-            margin: 15px 0;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            min-height: 100px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .game-ad-banner::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(78, 205, 196, 0.1), transparent);
-            animation: gameAdShimmer 4s infinite;
-        }
-
-        @keyframes gameAdShimmer {
-            0% {
-                left: -100%;
+            .ad-banner.top,
+            .ad-banner.bottom {
+                max-width: 320px;
+                height: 50px;
             }
 
-            100% {
-                left: 100%;
+            .ad-banner.sidebar {
+                max-width: 300px;
+                height: 200px;
             }
-        }
-
-        .game-ad-rotating {
-            transition: opacity 0.5s ease-in-out;
-        }
-
-        .game-ad-rotating.fade-out {
-            opacity: 0;
-        }
-
-        .game-ad-label {
-            position: absolute;
-            top: 3px;
-            right: 8px;
-            font-size: 0.6rem;
-            color: rgba(255, 255, 255, 0.4);
-            background: rgba(0, 0, 0, 0.4);
-            padding: 1px 4px;
-            border-radius: 2px;
-        }
-
-        .ad-banner-header {
-            position: fixed;
-            top: 70px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 728px;
-            z-index: 999;
         }
     </style>
 </head>
@@ -1208,16 +897,14 @@
     <div class="stars"></div>
     <div class="connection-status" id="connectionStatus">🔄 Connecting...</div>
 
-    <!-- Server Status Info -->
-    <div id="serverInfo"
-        style="position: fixed; top: 60px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 8px; font-size: 0.8rem; max-width: 300px; display: none; z-index: 1001;">
-        <div style="color: #4ecdc4; font-weight: bold; margin-bottom: 5px;">ℹ️ Server Info</div>
-        <div>Connecting to: adion-wall.onrender.com</div>
-        <div style="margin-top: 5px; color: #ffd700;">⏰ First connection may take 30-60 seconds as the server starts up.
-        </div>
-    </div>
-
     <div class="container">
+        <!-- Top Ad Banner -->
+        <div class="ad-banner top" id="topAdBanner">
+            <div class="ad-refresh-indicator" id="topAdTimer">15s</div>
+            <ins class="adsbygoogle" style="display:inline-block;width:728px;height:90px"
+                data-ad-client="ca-pub-1094886934592913" data-ad-slot="1234567890"></ins>
+        </div>
+
         <div class="header">
             <div class="logo">ADION WAR</div>
             <div class="subtitle">Epic Multiplayer Strategy Battle</div>
@@ -1323,22 +1010,6 @@
 
         <!-- Game Screen -->
         <div id="gameScreen" class="screen">
-            <!-- Top Game Ad Banner -->
-            <div class="ad-banner ad-banner-game-top ad-rotating" id="gameTopAdBanner">
-                <div class="ad-label">Ad</div>
-                <button class="ad-close-btn" onclick="hideAd('gameTopAdBanner')">&times;</button>
-                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-1094886934592913"
-                    data-ad-slot="1111111111" data-ad-format="auto" data-full-width-responsive="true"></ins>
-            </div>
-
-            <!-- Bottom Game Ad Banner -->
-            <div class="ad-banner ad-banner-game-bottom ad-rotating" id="gameBottomAdBanner">
-                <div class="ad-label">Ad</div>
-                <button class="ad-close-btn" onclick="hideAd('gameBottomAdBanner')">&times;</button>
-                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-1094886934592913"
-                    data-ad-slot="2222222222" data-ad-format="auto" data-full-width-responsive="true"></ins>
-            </div>
-
             <div class="game-screen">
                 <div class="left-panel">
                     <div class="player-info">
@@ -1351,6 +1022,13 @@
                         <span>👁️ Spectators: <span id="gameSpectators">0</span></span>
                     </div>
 
+                    <!-- Sidebar Ad Banner -->
+                    <div class="ad-banner sidebar" id="leftAdBanner">
+                        <div class="ad-refresh-indicator" id="leftAdTimer">15s</div>
+                        <ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px"
+                            data-ad-client="ca-pub-1094886934592913" data-ad-slot="0987654321"></ins>
+                    </div>
+
                     <div class="chat-container" id="chatContainer">
                         <div class="chat-message">
                             <strong>System:</strong> Game started! Good luck warriors!
@@ -1360,13 +1038,6 @@
                     <div class="chat-input">
                         <input type="text" id="chatInput" placeholder="Type message..." maxlength="100">
                         <button id="sendChatBtn">Send</button>
-                    </div>
-
-                    <!-- Left Panel Ad Banner -->
-                    <div class="game-ad-banner game-ad-rotating" id="gameLeftAdBanner">
-                        <div class="game-ad-label">Ad</div>
-                        <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-1094886934592913"
-                            data-ad-slot="2222222222" data-ad-format="auto" data-full-width-responsive="true"></ins>
                     </div>
                 </div>
 
@@ -1382,7 +1053,6 @@
                     <div class="game-controls">
                         <button class="control-btn" id="surrenderBtn">🏳️ Surrender</button>
                         <button class="control-btn" id="leaveGameBtn">🚪 Leave Game</button>
-                        <button class="control-btn" id="helpBtn">❓ Help <kbd>F1</kbd></button>
                     </div>
                 </div>
 
@@ -1392,51 +1062,58 @@
                         <div class="walls-remaining">Walls: <span id="player2Walls">10</span></div>
                     </div>
 
-                    <div
-                        style="background: rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2);">
-                        <h4 style="color: #4ecdc4; margin-bottom: 15px; text-align: center;">🎮 Game Controls</h4>
-
-                        <!-- Keyboard Shortcuts Display -->
-                        <div
-                            style="background: rgba(0, 0, 0, 0.3); border-radius: 10px; padding: 12px; margin-bottom: 15px; font-size: 0.85rem;">
-                            <div style="color: #ffd700; font-weight: bold; margin-bottom: 8px;">⌨️ Keyboard Shortcuts:
-                            </div>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 5px; color: #b0b0ff;">
-                                <div><kbd
-                                        style="background: #333; padding: 2px 6px; border-radius: 3px; color: white;">M</kbd>
-                                    Move Mode</div>
-                                <div><kbd
-                                        style="background: #333; padding: 2px 6px; border-radius: 3px; color: white;">W</kbd>
-                                    Wall Mode</div>
-                                <div><kbd
-                                        style="background: #333; padding: 2px 6px; border-radius: 3px; color: white;">H</kbd>
-                                    Horizontal</div>
-                                <div><kbd
-                                        style="background: #333; padding: 2px 6px; border-radius: 3px; color: white;">V</kbd>
-                                    Vertical</div>
-                            </div>
-                        </div>
-
+                    <div style="background: rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 15px;">
+                        <h4 style="color: #4ecdc4; margin-bottom: 15px;">Game Mode</h4>
                         <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                            <button class="control-btn active" id="moveModeBtn">
-                                <span style="font-size: 1.1rem;">🚶</span> Move <kbd>M</kbd>
-                            </button>
-                            <button class="control-btn" id="wallModeBtn">
-                                <span style="font-size: 1.1rem;">🧱</span> Wall <kbd>W</kbd>
-                            </button>
+                            <button class="control-btn" id="moveModeBtn" style="background: #4ecdc4;">Move</button>
+                            <button class="control-btn" id="wallModeBtn">Wall</button>
                         </div>
                         <div id="wallOrientation" style="display: none;">
-                            <p style="margin-bottom: 10px; color: #b0b0ff; text-align: center;">Wall Orientation:</p>
+                            <p style="margin-bottom: 10px;">Wall Orientation:</p>
                             <div style="display: flex; gap: 10px;">
-                                <button class="control-btn active" id="horizontalBtn">
-                                    <span style="font-size: 1.1rem;">↔️</span> Horizontal <kbd>H</kbd>
-                                </button>
-                                <button class="control-btn" id="verticalBtn">
-                                    <span style="font-size: 1.1rem;">↕️</span> Vertical <kbd>V</kbd>
-                                </button>
+                                <button class="control-btn" id="horizontalBtn">Horizontal</button>
+                                <button class="control-btn" id="verticalBtn">Vertical</button>
                             </div>
                         </div>
                     </div>
+
+                    <!-- Right Sidebar Ad Banner -->
+                    <div class="ad-banner sidebar" id="rightAdBanner">
+                        <div class="ad-refresh-indicator" id="rightAdTimer">15s</div>
+                        <ins class="adsbygoogle" style="display:inline-block;width:300px;height:250px"
+                            data-ad-client="ca-pub-1094886934592913" data-ad-slot="1122334455"></ins>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom Ad Banner -->
+        <div class="ad-banner bottom" id="bottomAdBanner">
+            <div class="ad-refresh-indicator" id="bottomAdTimer">15s</div>
+            <ins class="adsbygoogle" style="display:inline-block;width:728px;height:90px"
+                data-ad-client="ca-pub-1094886934592913" data-ad-slot="5566778899"></ins>
+        </div>
+    </div>
+
+    <!-- Disconnect Timer Modal -->
+    <div class="disconnect-timer-modal" id="disconnectTimerModal">
+        <div class="disconnect-timer-content">
+            <div class="disconnect-timer-title">⚠️ Player Disconnected</div>
+            <div style="font-size: 1.2rem; margin-bottom: 20px;" id="disconnectedPlayerName">Player has left the game
+            </div>
+            <div class="disconnect-countdown" id="disconnectCountdown">120</div>
+            <div style="font-size: 1rem; color: rgba(255, 255, 255, 0.9); margin-bottom: 20px;">
+                Waiting for player to reconnect...
+            </div>
+
+            <div class="continue-with-ai-section" id="continueWithAiSection" style="display: none;">
+                <h3 style="color: #ffd700; margin-bottom: 15px;">🤖 Continue with AI?</h3>
+                <p style="margin-bottom: 20px; color: rgba(255, 255, 255, 0.9);">
+                    The disconnected player didn't return. Would you like to continue playing against an AI opponent?
+                </p>
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button class="btn primary" id="continueWithAiBtn">🤖 Play vs AI</button>
+                    <button class="btn" id="endGameBtn">🏁 End Game</button>
                 </div>
             </div>
         </div>
@@ -1452,95 +1129,9 @@
         </div>
     </div>
 
-    <!-- Help Modal -->
-    <div class="modal" id="helpModal">
-        <div class="modal-content" style="max-width: 500px;">
-            <span class="close-btn" onclick="closeHelpModal()">&times;</span>
-            <h2 style="color: #4ecdc4; margin-bottom: 20px; text-align: center;">🎮 Game Controls & Rules</h2>
-
-            <div style="text-align: left; margin-bottom: 20px;">
-                <h3 style="color: #ffd700; margin-bottom: 10px;">⌨️ Keyboard Shortcuts:</h3>
-                <div style="display: grid; grid-template-columns: auto 1fr; gap: 10px; font-family: monospace;">
-                    <kbd style="background: #333; padding: 4px 8px; border-radius: 4px;">M</kbd><span>Switch to Move
-                        Mode</span>
-                    <kbd style="background: #333; padding: 4px 8px; border-radius: 4px;">W</kbd><span>Switch to Wall
-                        Mode</span>
-                    <kbd style="background: #333; padding: 4px 8px; border-radius: 4px;">H</kbd><span>Horizontal Wall
-                        Placement</span>
-                    <kbd style="background: #333; padding: 4px 8px; border-radius: 4px;">V</kbd><span>Vertical Wall
-                        Placement</span>
-                    <kbd style="background: #333; padding: 4px 8px; border-radius: 4px;">ESC</kbd><span>Reset to Move
-                        Mode</span>
-                    <kbd style="background: #333; padding: 4px 8px; border-radius: 4px;">F1</kbd><span>Show/Hide
-                        Help</span>
-                </div>
-            </div>
-
-            <div style="text-align: left; margin-bottom: 20px;">
-                <h3 style="color: #ffd700; margin-bottom: 10px;">🎯 Game Rules:</h3>
-                <ul style="margin-left: 20px; line-height: 1.6;">
-                    <li>Move your pawn one space at a time (up, down, left, right)</li>
-                    <li>Jump over your opponent if they're adjacent</li>
-                    <li>Place walls to block your opponent's path (10 walls each)</li>
-                    <li>First player to reach the opposite side wins!</li>
-                    <li>Walls cannot completely block a player's path to victory</li>
-                </ul>
-            </div>
-
-            <button class="btn primary" onclick="closeHelpModal()">Got it!</button>
-        </div>
-    </div>
-
-    <!-- Reconnection Timer Modal -->
-    <div class="reconnection-modal" id="reconnectionModal">
-        <div class="reconnection-content">
-            <h2 style="color: #ff9800; margin-bottom: 20px;">⚠️ Player Disconnected</h2>
-            <p style="font-size: 1.1rem; margin-bottom: 20px;" id="disconnectedPlayerName">Your opponent has left the
-                game</p>
-            <p style="margin-bottom: 20px;">Waiting for reconnection...</p>
-
-            <div class="reconnection-timer" id="reconnectionTimer">2:00</div>
-
-            <div style="background: rgba(0, 0, 0, 0.3); padding: 15px; border-radius: 10px; margin: 20px 0;">
-                <p style="font-size: 0.9rem; color: #b0b0ff;">
-                    If your opponent doesn't return within 2 minutes, you can:
-                </p>
-                <ul style="text-align: left; margin: 10px 0; color: #b0b0ff;">
-                    <li>Continue playing against AI</li>
-                    <li>Claim victory by forfeit</li>
-                    <li>Return to menu</li>
-                </ul>
-            </div>
-
-            <div class="reconnection-options">
-                <button class="btn" id="waitLongerBtn">⏳ Wait Longer</button>
-                <button class="btn" id="claimVictoryBtn">🏆 Claim Victory</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- AI Takeover Modal -->
-    <div class="ai-takeover-modal" id="aiTakeoverModal">
-        <div class="ai-takeover-content">
-            <h2 style="margin-bottom: 20px;">🤖 Continue with AI?</h2>
-            <p style="margin-bottom: 30px;">Your opponent didn't return. Would you like to continue playing against the
-                computer?</p>
-
-            <div style="margin: 20px 0;">
-                <p style="margin-bottom: 10px;">Choose AI Difficulty:</p>
-                <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 20px;">
-                    <button class="btn" id="easyAIBtn" data-difficulty="easy">😊 Easy</button>
-                    <button class="btn primary" id="mediumAIBtn" data-difficulty="medium">🤔 Medium</button>
-                    <button class="btn" id="hardAIBtn" data-difficulty="hard">😈 Hard</button>
-                </div>
-            </div>
-
-            <div style="display: flex; gap: 15px; justify-content: center;">
-                <button class="btn primary" id="continueWithAIBtn">🤖 Play vs AI</button>
-                <button class="btn" id="endGameBtn">🏁 End Game</button>
-            </div>
-        </div>
-    </div>
+    <!-- AdSense Script -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1094886934592913"
+        crossorigin="anonymous"></script>
 
     <!-- Socket.IO Client -->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
@@ -1548,7 +1139,6 @@
     <script>
         // Game state and configuration
         const SERVER_URL = 'https://adion-wall.onrender.com';
-        const FALLBACK_SERVER = 'http://localhost:3000'; // Fallback for local development
         let socket = null;
         let gameState = {
             currentScreen: 'login',
@@ -1562,11 +1152,24 @@
             selectedPawn: null,
             isMyTurn: false,
             isSpectator: false,
-            reconnectionTimer: null,
-            reconnectionTimeLeft: 0,
-            opponentDisconnected: false,
-            aiMode: false,
-            aiDifficulty: 'medium'
+            disconnectTimer: null,
+            disconnectCountdown: 120,
+            playingAgainstAI: false
+        };
+
+        // Ad management
+        let adTimers = {
+            top: null,
+            left: null,
+            right: null,
+            bottom: null
+        };
+
+        let adCountdowns = {
+            top: 15,
+            left: 15,
+            right: 15,
+            bottom: 15
         };
 
         // DOM Elements
@@ -1581,32 +1184,8 @@
         // Initialize the game
         function init() {
             setupEventListeners();
-            testServerConnection();
             initializeConnection();
-        }
-
-        // Test server connection
-        function testServerConnection() {
-            console.log('🔍 Testing server connection to:', SERVER_URL);
-
-            // Test if server is reachable
-            fetch(SERVER_URL + '/health')
-                .then(response => {
-                    if (response.ok) {
-                        console.log('✅ Server is reachable and healthy');
-                        return response.text();
-                    } else {
-                        console.warn('⚠️ Server responded with status:', response.status);
-                        throw new Error(`Server returned ${response.status}`);
-                    }
-                })
-                .then(data => {
-                    console.log('Server response:', data);
-                })
-                .catch(error => {
-                    console.error('❌ Server connection test failed:', error);
-                    showNotification('Connecting to server... This may take a moment if the server is starting up.', 'warning');
-                });
+            initializeAds();
         }
 
         // Setup all event listeners
@@ -1642,100 +1221,66 @@
             });
             document.getElementById('surrenderBtn').addEventListener('click', handleSurrender);
             document.getElementById('leaveGameBtn').addEventListener('click', handleLeaveGame);
-            document.getElementById('helpBtn').addEventListener('click', showHelpModal);
 
             // Victory modal
             document.getElementById('playAgainBtn').addEventListener('click', handlePlayAgain);
             document.getElementById('backToMenuFromVictoryBtn').addEventListener('click', handleBackToMenuFromVictory);
 
-            // Reconnection modal
-            document.getElementById('waitLongerBtn').addEventListener('click', handleWaitLonger);
-            document.getElementById('claimVictoryBtn').addEventListener('click', handleClaimVictory);
-
-            // AI takeover modal
-            document.getElementById('easyAIBtn').addEventListener('click', (e) => selectAIDifficulty(e, 'easy'));
-            document.getElementById('mediumAIBtn').addEventListener('click', (e) => selectAIDifficulty(e, 'medium'));
-            document.getElementById('hardAIBtn').addEventListener('click', (e) => selectAIDifficulty(e, 'hard'));
-            document.getElementById('continueWithAIBtn').addEventListener('click', handleContinueWithAI);
-            document.getElementById('endGameBtn').addEventListener('click', handleEndGame);
-
-            // Keyboard controls
-            document.addEventListener('keydown', handleKeyboardInput);
-            document.addEventListener('keyup', handleKeyboardRelease);
+            // Disconnect timer modal
+            document.getElementById('continueWithAiBtn').addEventListener('click', handleContinueWithAI);
+            document.getElementById('endGameBtn').addEventListener('click', handleEndGameFromDisconnect);
         }
 
         // Connection management
         function initializeConnection() {
-            updateConnectionStatus('connecting', '🔄 Connecting to Adion War Server...');
-            console.log('🚀 Initializing connection to:', SERVER_URL);
+            updateConnectionStatus('connecting', '🔄 Connecting...');
 
             try {
                 socket = io(SERVER_URL, {
                     transports: ['websocket', 'polling'],
-                    timeout: 20000,
+                    timeout: 10000,
                     reconnection: true,
-                    reconnectionAttempts: 15,
-                    reconnectionDelay: 3000,
-                    reconnectionDelayMax: 15000,
-                    maxReconnectionAttempts: 15,
-                    forceNew: true,
-                    autoConnect: true
+                    reconnectionAttempts: 5,
+                    reconnectionDelay: 1000
                 });
 
                 setupSocketListeners();
-
-                // Add connection timeout
-                const connectionTimeout = setTimeout(() => {
-                    if (!socket.connected) {
-                        console.warn('⏰ Connection timeout - server may be starting up');
-                        updateConnectionStatus('connecting', '🔄 Server starting up...');
-                        showNotification('Server is starting up, please wait...', 'warning');
-                    }
-                }, 10000);
-
-                socket.on('connect', () => {
-                    clearTimeout(connectionTimeout);
-                });
-
             } catch (error) {
-                console.error('❌ Connection initialization error:', error);
-                updateConnectionStatus('offline', '❌ Failed to initialize connection');
-                showNotification('Failed to initialize connection. Please refresh the page.', 'error');
+                console.error('Connection error:', error);
+                updateConnectionStatus('offline', '❌ Connection Failed');
             }
         }
 
         function setupSocketListeners() {
             socket.on('connect', () => {
-                console.log('✅ Successfully connected to Adion War Server');
-                updateConnectionStatus('online', '🟢 Connected to Server');
-                showNotification('Connected to Adion War Server!', 'success');
+                console.log('Connected to server');
+                updateConnectionStatus('online', '🟢 Connected');
             });
 
             socket.on('disconnect', (reason) => {
-                console.log('❌ Disconnected from server:', reason);
+                console.log('Disconnected:', reason);
                 updateConnectionStatus('offline', '🔴 Disconnected');
-
-                if (reason === 'io server disconnect') {
-                    showNotification('Server disconnected you. Please refresh the page.', 'error');
-                } else {
-                    showNotification('Lost connection to server. Attempting to reconnect...', 'warning');
-                }
             });
 
             socket.on('connect_error', (error) => {
-                console.error('❌ Connection error:', error);
+                console.error('Connection error:', error);
                 updateConnectionStatus('offline', '❌ Connection Failed');
-                showNotification('Unable to connect to server. Retrying...', 'error');
+
+                // Try to reconnect after a delay
+                setTimeout(() => {
+                    if (socket.disconnected) {
+                        updateConnectionStatus('connecting', '🔄 Reconnecting...');
+                        socket.connect();
+                    }
+                }, 3000);
             });
 
             socket.on('reconnect', (attemptNumber) => {
-                console.log('✅ Reconnected to server after', attemptNumber, 'attempts');
+                console.log('Reconnected after', attemptNumber, 'attempts');
                 updateConnectionStatus('online', '🟢 Reconnected');
-                showNotification('Reconnected to server!', 'success');
 
                 // Re-authenticate if we have player data
                 if (gameState.player) {
-                    console.log('Re-authenticating player...');
                     socket.emit('player:login', {
                         name: gameState.player.name,
                         email: gameState.player.email || '',
@@ -1744,25 +1289,14 @@
                         if (response.success) {
                             gameState.player = response.player;
                             updatePlayerProfile();
-                            console.log('Player re-authenticated successfully');
-                        } else {
-                            console.error('Failed to re-authenticate player');
-                            showNotification('Please log in again', 'warning');
-                            showScreen('login');
                         }
                     });
                 }
             });
 
             socket.on('reconnect_error', (error) => {
-                console.error('❌ Reconnection failed:', error);
+                console.error('Reconnection failed:', error);
                 updateConnectionStatus('offline', '❌ Reconnection Failed');
-            });
-
-            socket.on('reconnect_failed', () => {
-                console.error('❌ All reconnection attempts failed');
-                updateConnectionStatus('offline', '❌ Connection Lost');
-                showNotification('Unable to reconnect to server. Please refresh the page.', 'error');
             });
 
             // Game event listeners
@@ -1774,44 +1308,15 @@
             socket.on('game:moveUpdate', handleMoveUpdate);
             socket.on('game:ended', handleGameEnded);
             socket.on('chat:newMessage', handleChatMessage);
+            socket.on('player:disconnected', handlePlayerDisconnected);
+            socket.on('player:reconnected', handlePlayerReconnected);
+            socket.on('game:continueWithAI', handleGameContinueWithAI);
         }
 
         function updateConnectionStatus(status, text) {
             const statusEl = document.getElementById('connectionStatus');
-            const serverInfo = document.getElementById('serverInfo');
-
             statusEl.className = `connection-status ${status}`;
             statusEl.textContent = text;
-
-            // Show server info when connecting
-            if (status === 'connecting') {
-                serverInfo.style.display = 'block';
-                setTimeout(() => {
-                    if (serverInfo.style.display === 'block') {
-                        serverInfo.style.display = 'none';
-                    }
-                }, 15000);
-            } else {
-                serverInfo.style.display = 'none';
-            }
-
-            // Add click handler for manual reconnection when offline
-            if (status === 'offline') {
-                statusEl.style.cursor = 'pointer';
-                statusEl.title = 'Click to reconnect';
-                statusEl.onclick = () => {
-                    if (socket && socket.disconnected) {
-                        updateConnectionStatus('connecting', '🔄 Reconnecting...');
-                        socket.connect();
-                    } else {
-                        initializeConnection();
-                    }
-                };
-            } else {
-                statusEl.style.cursor = 'default';
-                statusEl.title = '';
-                statusEl.onclick = null;
-            }
         }
 
         // Screen management
@@ -1819,13 +1324,6 @@
             Object.values(screens).forEach(screen => screen.classList.remove('active'));
             screens[screenName].classList.add('active');
             gameState.currentScreen = screenName;
-
-            // Manage ads based on screen
-            if (screenName === 'game') {
-                setTimeout(startGameAdRotation, 2000);
-            } else {
-                stopGameAdRotation();
-            }
         }
 
         // Authentication handlers
@@ -2478,13 +1976,8 @@
             const moveBtn = document.getElementById('moveModeBtn');
             const wallBtn = document.getElementById('wallModeBtn');
 
-            if (mode === 'move') {
-                moveBtn.classList.add('active');
-                wallBtn.classList.remove('active');
-            } else {
-                moveBtn.classList.remove('active');
-                wallBtn.classList.add('active');
-            }
+            moveBtn.style.background = mode === 'move' ? '#4ecdc4' : '#667eea';
+            wallBtn.style.background = mode === 'wall' ? '#4ecdc4' : '#667eea';
 
             // Show/hide wall orientation controls
             const wallOrientation = document.getElementById('wallOrientation');
@@ -2506,16 +1999,8 @@
             gameState.wallOrientation = orientation;
 
             // Update button styles
-            const horizontalBtn = document.getElementById('horizontalBtn');
-            const verticalBtn = document.getElementById('verticalBtn');
-
-            if (orientation === 'horizontal') {
-                horizontalBtn.classList.add('active');
-                verticalBtn.classList.remove('active');
-            } else {
-                horizontalBtn.classList.remove('active');
-                verticalBtn.classList.add('active');
-            }
+            document.getElementById('horizontalBtn').style.background = orientation === 'horizontal' ? '#4ecdc4' : '#667eea';
+            document.getElementById('verticalBtn').style.background = orientation === 'vertical' ? '#4ecdc4' : '#667eea';
 
             // Update wall previews if in wall mode
             if (gameState.gameMode === 'wall') {
@@ -2631,24 +2116,6 @@
             showScreen('menu');
         }
 
-        // Help Modal Functions
-        function showHelpModal() {
-            document.getElementById('helpModal').style.display = 'flex';
-        }
-
-        function closeHelpModal() {
-            document.getElementById('helpModal').style.display = 'none';
-        }
-
-        function toggleHelpModal() {
-            const modal = document.getElementById('helpModal');
-            if (modal.style.display === 'flex') {
-                closeHelpModal();
-            } else {
-                showHelpModal();
-            }
-        }
-
         function formatRoomCodeInput(event) {
             let value = event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
             if (value.length > 6) {
@@ -2657,275 +2124,207 @@
             event.target.value = value;
         }
 
-        // Keyboard Controls - New Feature
-        let keyPressed = {};
-
-        function handleKeyboardInput(event) {
-            // Only handle keyboard input during game screen and if it's player's turn
-            if (gameState.currentScreen !== 'game' || !gameState.isMyTurn) return;
-
-            // Prevent default for our handled keys
-            const key = event.key.toLowerCase();
-            if (['m', 'w', 'h', 'v', 'escape', 'f1'].includes(key)) {
-                event.preventDefault();
-            }
-
-            // Avoid repeated keydown events
-            if (keyPressed[key]) return;
-            keyPressed[key] = true;
-
-            switch (key) {
-                case 'm':
-                    setGameMode('move');
-                    showKeyboardFeedback('Move Mode Activated', '🚶');
-                    break;
-
-                case 'w':
-                    setGameMode('wall');
-                    showKeyboardFeedback('Wall Mode Activated', '🧱');
-                    break;
-
-                case 'h':
-                    if (gameState.gameMode === 'wall') {
-                        setWallOrientation('horizontal');
-                        showKeyboardFeedback('Horizontal Walls', '↔️');
-                    }
-                    break;
-
-                case 'v':
-                    if (gameState.gameMode === 'wall') {
-                        setWallOrientation('vertical');
-                        showKeyboardFeedback('Vertical Walls', '↕️');
-                    }
-                    break;
-
-                case 'escape':
-                    // Reset to move mode
-                    setGameMode('move');
-                    showKeyboardFeedback('Reset to Move Mode', '🚶');
-                    break;
-
-                case 'f1':
-                    toggleHelpModal();
-                    break;
-            }
-        }
-
-        function handleKeyboardRelease(event) {
-            const key = event.key.toLowerCase();
-            keyPressed[key] = false;
-        }
-
-        function showKeyboardFeedback(message, icon) {
-            // Remove existing feedback
-            const existing = document.querySelector('.keyboard-feedback');
-            if (existing) existing.remove();
-
-            const feedback = document.createElement('div');
-            feedback.className = 'keyboard-feedback';
-            feedback.innerHTML = `<span style="font-size: 1.2rem; margin-right: 8px;">${icon}</span>${message}`;
-
-            feedback.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: linear-gradient(145deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.8));
-                color: #4ecdc4;
-                padding: 15px 25px;
-                border-radius: 25px;
-                font-weight: bold;
-                font-size: 1.1rem;
-                z-index: 2000;
-                border: 2px solid #4ecdc4;
-                box-shadow: 
-                    0 10px 30px rgba(78, 205, 196, 0.3),
-                    0 5px 15px rgba(0, 0, 0, 0.5),
-                    inset 0 1px 2px rgba(255, 255, 255, 0.2);
-                animation: keyboardFeedbackShow 0.6s ease;
-                backdrop-filter: blur(10px);
-            `;
-
-            document.body.appendChild(feedback);
-
-            // Auto remove after 1.5 seconds
-            setTimeout(() => {
-                feedback.style.animation = 'keyboardFeedbackHide 0.4s ease';
-                setTimeout(() => {
-                    if (feedback.parentNode) {
-                        feedback.parentNode.removeChild(feedback);
-                    }
-                }, 400);
-            }, 1500);
-        }
-
-        // Initialize the game when page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            init();
-            initializeGameAds();
-        });
-
-        // Manage ad rotation based on screen visibility
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                stopGameAdRotation();
-            } else if (gameState.currentScreen === 'game') {
-                setTimeout(startGameAdRotation, 1000);
-            }
-        });
-
-
-        // Game Ad Management System
-        let gameAdRotationInterval = null;
-        let gameAdSlots = [
-            { id: 'gameTopAdBanner', slot: '1111111111' },
-            { id: 'gameBottomAdBanner', slot: '2222222222' },
-            { id: 'gameLeftAdBanner', slot: '3333333333' }
-        ];
-        let hiddenAds = new Set();
-
-        function initializeGameAds() {
+        // Ad Management System
+        function initializeAds() {
             // Initialize AdSense ads
             try {
                 (adsbygoogle = window.adsbygoogle || []).push({});
                 (adsbygoogle = window.adsbygoogle || []).push({});
-            } catch (e) {
-                console.log('Game AdSense initialization error:', e);
-            }
-
-            // Start ad rotation after 15 seconds
-            setTimeout(startGameAdRotation, 15000);
-        }
-
-        function startGameAdRotation() {
-            if (gameAdRotationInterval) return; // Prevent multiple intervals
-
-            gameAdRotationInterval = setInterval(() => {
-                rotateGameAds();
-            }, 15000); // Rotate every 15 seconds
-        }
-
-        function rotateGameAds() {
-            gameAdSlots.forEach(adSlot => {
-                if (hiddenAds.has(adSlot.id)) return; // Skip hidden ads
-
-                const adElement = document.getElementById(adSlot.id);
-                if (adElement && gameState.currentScreen === 'game') {
-                    // Fade out
-                    adElement.classList.add('fade-out');
-
-                    setTimeout(() => {
-                        // Refresh ad content
-                        refreshGameAdSlot(adSlot.id, adSlot.slot);
-
-                        // Fade back in
-                        adElement.classList.remove('fade-out');
-                    }, 500);
-                }
-            });
-        }
-
-        function refreshGameAdSlot(containerId, adSlot) {
-            const container = document.getElementById(containerId);
-            if (!container || hiddenAds.has(containerId)) return;
-
-            // Remove existing ad
-            const existingAd = container.querySelector('.adsbygoogle');
-            if (existingAd) {
-                existingAd.remove();
-            }
-
-            // Create new ad
-            const newAd = document.createElement('ins');
-            newAd.className = 'adsbygoogle';
-            newAd.style.display = 'block';
-            newAd.setAttribute('data-ad-client', 'ca-pub-1094886934592913');
-            newAd.setAttribute('data-ad-slot', adSlot);
-            newAd.setAttribute('data-ad-format', 'auto');
-            newAd.setAttribute('data-full-width-responsive', 'true');
-
-            container.appendChild(newAd);
-
-            // Push to AdSense
-            try {
+                (adsbygoogle = window.adsbygoogle || []).push({});
                 (adsbygoogle = window.adsbygoogle || []).push({});
             } catch (e) {
-                console.log('Game ad refresh error:', e);
+                console.log('AdSense initialization error:', e);
             }
+
+            // Start ad rotation timers
+            startAdRotation('top');
+            startAdRotation('left');
+            startAdRotation('right');
+            startAdRotation('bottom');
         }
 
-        function stopGameAdRotation() {
-            if (gameAdRotationInterval) {
-                clearInterval(gameAdRotationInterval);
-                gameAdRotationInterval = null;
-            }
+        function startAdRotation(position) {
+            const timerElement = document.getElementById(`${position}AdTimer`);
+
+            adTimers[position] = setInterval(() => {
+                adCountdowns[position]--;
+                timerElement.textContent = `${adCountdowns[position]}s`;
+
+                if (adCountdowns[position] <= 0) {
+                    refreshAd(position);
+                    adCountdowns[position] = 15; // Reset to 15 seconds
+                }
+            }, 1000);
         }
 
-        function hideAd(adId) {
-            const adElement = document.getElementById(adId);
+        function refreshAd(position) {
+            const adBanner = document.getElementById(`${position}AdBanner`);
+            const adElement = adBanner.querySelector('.adsbygoogle');
+
             if (adElement) {
-                adElement.style.display = 'none';
-                hiddenAds.add(adId);
+                // Create new ad element
+                const newAdElement = adElement.cloneNode(true);
+                adElement.parentNode.replaceChild(newAdElement, adElement);
 
-                // Show notification
-                showNotification('Ad hidden for this session', 'info');
+                // Push new ad
+                try {
+                    (adsbygoogle = window.adsbygoogle || []).push({});
+                } catch (e) {
+                    console.log('Ad refresh error:', e);
+                }
             }
         }
 
-        function showGameAds() {
-            gameAdSlots.forEach(adSlot => {
-                if (!hiddenAds.has(adSlot.id)) {
-                    const adElement = document.getElementById(adSlot.id);
-                    if (adElement) {
-                        adElement.style.display = 'flex';
-                    }
+        function stopAdRotation() {
+            Object.keys(adTimers).forEach(position => {
+                if (adTimers[position]) {
+                    clearInterval(adTimers[position]);
+                    adTimers[position] = null;
                 }
             });
-            startGameAdRotation();
         }
 
-        function hideGameAds() {
-            gameAdSlots.forEach(adSlot => {
-                const adElement = document.getElementById(adSlot.id);
-                if (adElement) {
-                    adElement.style.display = 'none';
+        // Player Disconnect Management
+        function handlePlayerDisconnected(data) {
+            if (gameState.currentScreen !== 'game') return;
+
+            const disconnectedPlayerName = data.playerName;
+            gameState.disconnectCountdown = 120; // 2 minutes
+
+            document.getElementById('disconnectedPlayerName').textContent = `${disconnectedPlayerName} has left the game`;
+            document.getElementById('disconnectTimerModal').style.display = 'flex';
+
+            startDisconnectTimer();
+            addChatMessage('System', `${disconnectedPlayerName} disconnected. Waiting for reconnection...`);
+        }
+
+        function handlePlayerReconnected(data) {
+            const reconnectedPlayerName = data.playerName;
+
+            // Hide disconnect modal
+            document.getElementById('disconnectTimerModal').style.display = 'none';
+
+            // Clear disconnect timer
+            if (gameState.disconnectTimer) {
+                clearInterval(gameState.disconnectTimer);
+                gameState.disconnectTimer = null;
+            }
+
+            addChatMessage('System', `${reconnectedPlayerName} reconnected! Game continues.`);
+            showNotification(`${reconnectedPlayerName} is back!`, 'success');
+        }
+
+        function startDisconnectTimer() {
+            const countdownElement = document.getElementById('disconnectCountdown');
+            const continueSection = document.getElementById('continueWithAiSection');
+
+            gameState.disconnectTimer = setInterval(() => {
+                gameState.disconnectCountdown--;
+                countdownElement.textContent = gameState.disconnectCountdown;
+
+                if (gameState.disconnectCountdown <= 0) {
+                    clearInterval(gameState.disconnectTimer);
+                    gameState.disconnectTimer = null;
+
+                    // Show AI continue option
+                    continueSection.style.display = 'block';
+                    countdownElement.textContent = '0';
+
+                    addChatMessage('System', 'Player did not reconnect. You can continue with AI or end the game.');
+                }
+            }, 1000);
+        }
+
+        function handleContinueWithAI() {
+            socket.emit('game:continueWithAI', (response) => {
+                if (response.success) {
+                    gameState.playingAgainstAI = true;
+                    document.getElementById('disconnectTimerModal').style.display = 'none';
+                    addChatMessage('System', '🤖 AI opponent has joined the game!');
+                    showNotification('Now playing against AI', 'info');
+                } else {
+                    alert('Failed to continue with AI: ' + response.error);
                 }
             });
-            stopGameAdRotation();
         }
 
-        // Screen change handler for ads
-        function handleScreenChangeForAds(screenName) {
-            if (screenName === 'game') {
-                showGameAds();
-            } else {
-                hideGameAds();
-            }
+        function handleEndGameFromDisconnect() {
+            socket.emit('game:endDueToDisconnect', (response) => {
+                document.getElementById('disconnectTimerModal').style.display = 'none';
+
+                // Show victory modal for the remaining player
+                document.getElementById('victoryTitle').textContent = 'VICTORY!';
+                document.getElementById('victoryMessage').textContent = 'You win by forfeit!';
+                document.getElementById('victoryModal').style.display = 'flex';
+
+                addChatMessage('System', 'Game ended due to player disconnect.');
+            });
         }
 
-        // Stop ad rotation when page is hidden
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                stopGameAdRotation();
-            } else if (gameState.currentScreen === 'game') {
-                setTimeout(startGameAdRotation, 1000);
-            }
-        });
+        function handleGameContinueWithAI(data) {
+            gameState.playingAgainstAI = true;
+            gameState.room = data.gameState;
 
-        // Integrate ad handling into existing showScreen function
-        const originalShowScreen = showScreen;
+            // Update player info to show AI
+            const aiPlayerNumber = data.aiPlayerNumber;
+            const aiPlayerInfo = document.getElementById(`player${aiPlayerNumber}Info`);
+            aiPlayerInfo.innerHTML = `🤖 AI Player ${aiPlayerNumber}`;
+
+            updateGameBoard();
+            updateTurnIndicator();
+
+            addChatMessage('System', '🤖 AI has taken control of the disconnected player.');
+        }
+
+        // Enhanced game leave handling
+        function handleLeaveGame() {
+            if (gameState.disconnectTimer) {
+                clearInterval(gameState.disconnectTimer);
+                gameState.disconnectTimer = null;
+            }
+
+            socket.emit('room:leave', () => {
+                gameState.room = null;
+                gameState.isSpectator = false;
+                gameState.playingAgainstAI = false;
+                showScreen('menu');
+            });
+        }
+
+        // Clean up timers when leaving
+        function cleanupTimers() {
+            if (gameState.disconnectTimer) {
+                clearInterval(gameState.disconnectTimer);
+                gameState.disconnectTimer = null;
+            }
+            stopAdRotation();
+        }
+
+        // Enhanced screen management with cleanup
         function showScreen(screenName) {
+            // Clean up timers when leaving game screen
+            if (gameState.currentScreen === 'game' && screenName !== 'game') {
+                cleanupTimers();
+            }
+
             Object.values(screens).forEach(screen => screen.classList.remove('active'));
             screens[screenName].classList.add('active');
             gameState.currentScreen = screenName;
 
-            // Handle ads based on screen
+            // Restart ad rotation when entering game screen
             if (screenName === 'game') {
-                showGameAds();
-            } else {
-                hideGameAds();
+                setTimeout(() => {
+                    startAdRotation('left');
+                    startAdRotation('right');
+                }, 1000);
             }
         }
+
+        // Initialize the game when page loads
+        document.addEventListener('DOMContentLoaded', init);
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', cleanupTimers);
     </script>
 </body>
 
