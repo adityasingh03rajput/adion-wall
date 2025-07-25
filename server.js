@@ -748,6 +748,93 @@ io.on('connection', (socket) => {
         }
     });
 
+    // Continue game with AI
+    socket.on('game:continueWithAI', (callback) => {
+        try {
+            const player = players.get(socket.id);
+            const room = gameRooms.get(player?.currentRoom);
+
+            if (!room || room.gameState !== 'playing') {
+                callback({ success: false, error: 'Game not active' });
+                return;
+            }
+
+            // Find the disconnected player
+            const disconnectedPlayerIndex = room.players.findIndex(p => !io.sockets.sockets.has(p.id));
+            if (disconnectedPlayerIndex === -1) {
+                callback({ success: false, error: 'No disconnected player found' });
+                return;
+            }
+
+            const disconnectedPlayer = room.players[disconnectedPlayerIndex];
+            const aiPlayerNumber = disconnectedPlayerIndex + 1;
+
+            // Replace disconnected player with AI
+            disconnectedPlayer.name = `AI Player ${aiPlayerNumber}`;
+            disconnectedPlayer.isAI = true;
+            room.aiPlayer = aiPlayerNumber;
+
+            // Clear any reconnection timer
+            if (room.reconnectionTimers.has(disconnectedPlayer.id)) {
+                clearTimeout(room.reconnectionTimers.get(disconnectedPlayer.id));
+                room.reconnectionTimers.delete(disconnectedPlayer.id);
+            }
+
+            // Notify room about AI takeover
+            io.to(room.id).emit('game:continueWithAI', {
+                gameState: room,
+                aiPlayerNumber: aiPlayerNumber
+            });
+
+            // If it's AI's turn, make AI move
+            if (room.currentPlayer === aiPlayerNumber) {
+                setTimeout(() => makeAIMove(room), 1000);
+            }
+
+            callback({ success: true });
+        } catch (error) {
+            callback({ success: false, error: error.message });
+        }
+    });
+
+    // End game due to disconnect
+    socket.on('game:endDueToDisconnect', (callback) => {
+        try {
+            const player = players.get(socket.id);
+            const room = gameRooms.get(player?.currentRoom);
+
+            if (!room) {
+                callback({ success: false, error: 'Room not found' });
+                return;
+            }
+
+            const winnerNumber = room.getPlayerNumber(socket.id);
+            if (winnerNumber) {
+                room.gameState = 'finished';
+                
+                // Update winner stats
+                const winner = room.players[winnerNumber - 1];
+                winner.stats.wins++;
+                winner.stats.gamesPlayed++;
+                winner.stats.points += 15; // Less points for forfeit win
+                winner.coins += 50;
+                
+                updatePlayerRank(winner);
+                if (winner.email) userStats.set(winner.email, winner.stats);
+
+                io.to(room.id).emit('game:ended', {
+                    winner: winnerNumber,
+                    reason: 'forfeit',
+                    gameState: room
+                });
+            }
+
+            callback({ success: true });
+        } catch (error) {
+            callback({ success: false, error: error.message });
+        }
+    });
+
     // Disconnect handling
     socket.on('disconnect', (reason) => {
         console.log(`Player disconnected: ${socket.id}, reason: ${reason}`);
@@ -770,7 +857,7 @@ io.on('connection', (socket) => {
                     room.startReconnectionTimer(socket.id);
                     
                     // Notify room of disconnection
-                    socket.to(room.id).emit('room:playerDisconnected', {
+                    socket.to(room.id).emit('player:disconnected', {
                         playerId: socket.id,
                         playerName: player.name,
                         reconnectionTime: 120 // 2 minutes
@@ -820,6 +907,239 @@ function updatePlayerRank(player) {
     } else {
         player.stats.rank = 'Novice';
     }
+}
+
+// AI Logic for computer opponent
+function makeAIMove(room) {
+    if (!room || room.gameState !== 'playing' || !room.aiPlayer) return;
+    
+    const aiPlayerNumber = room.aiPlayer;
+    if (room.currentPlayer !== aiPlayerNumber) return;
+    
+    const aiPos = room.board[`player${aiPlayerNumber}`];
+    const targetY = aiPlayerNumber === 1 ? 8 : 0;
+    
+    // Simple AI strategy: Move towards goal, place walls to block opponent
+    let bestMove = null;
+    
+    // 70% chance to move, 30% chance to place wall (if available)
+    const shouldPlaceWall = Math.random() < 0.3 && room.board[`player${aiPlayerNumber}`].walls > 0;
+    
+    if (shouldPlaceWall) {
+        bestMove = findBestWallPlacement(room, aiPlayerNumber);
+    }
+    
+    if (!bestMove) {
+        bestMove = findBestMove(room, aiPlayerNumber);
+    }
+    
+    if (bestMove) {
+        setTimeout(() => {
+            const result = room.makeMove(`ai_${aiPlayerNumber}`, bestMove);
+            
+            if (result.success) {
+                io.to(room.id).emit('game:moveUpdate', {
+                    move: bestMove,
+                    gameState: room,
+                    currentPlayer: room.currentPlayer
+                });
+                
+                if (result.gameEnded) {
+                    // Handle AI win/loss
+                    const winner = room.players[result.winner - 1];
+                    const loser = room.players[result.winner === 1 ? 1 : 0];
+                    
+                    if (!winner.isAI) {
+                        winner.stats.wins++;
+                        winner.stats.gamesPlayed++;
+                        winner.stats.points += 20;
+                        winner.coins += 75;
+                        updatePlayerRank(winner);
+                        if (winner.email) userStats.set(winner.email, winner.stats);
+                    }
+                    
+                    if (!loser.isAI) {
+                        loser.stats.losses++;
+                        loser.stats.gamesPlayed++;
+                        loser.stats.points = Math.max(0, loser.stats.points - 5);
+                        loser.coins += 25;
+                        updatePlayerRank(loser);
+                        if (loser.email) userStats.set(loser.email, loser.stats);
+                    }
+                    
+                    io.to(room.id).emit('game:ended', {
+                        winner: result.winner,
+                        gameState: room,
+                        vsAI: true
+                    });
+                } else if (room.currentPlayer === aiPlayerNumber) {
+                    // AI's turn again, make another move
+                    setTimeout(() => makeAIMove(room), 1500);
+                }
+            }
+        }, 1000 + Math.random() * 2000); // Random delay 1-3 seconds
+    }
+}
+
+function findBestMove(room, playerNumber) {
+    const pos = room.board[`player${playerNumber}`];
+    const targetY = playerNumber === 1 ? 8 : 0;
+    const opponentNumber = playerNumber === 1 ? 2 : 1;
+    const opponentPos = room.board[`player${opponentNumber}`];
+    
+    const possibleMoves = [
+        { x: pos.x, y: pos.y + (targetY > pos.y ? 1 : -1) }, // Move towards goal
+        { x: pos.x - 1, y: pos.y },
+        { x: pos.x + 1, y: pos.y },
+        { x: pos.x, y: pos.y + (targetY > pos.y ? -1 : 1) } // Move away from goal (last resort)
+    ];
+    
+    // Filter valid moves
+    const validMoves = possibleMoves.filter(move => {
+        if (move.x < 0 || move.x >= 9 || move.y < 0 || move.y >= 9) return false;
+        if (move.x === opponentPos.x && move.y === opponentPos.y) return false;
+        return room.isValidMove(playerNumber, move.x, move.y);
+    });
+    
+    if (validMoves.length === 0) return null;
+    
+    // Prefer moves that get closer to goal
+    validMoves.sort((a, b) => {
+        const distA = Math.abs(a.y - targetY);
+        const distB = Math.abs(b.y - targetY);
+        return distA - distB;
+    });
+    
+    return {
+        type: 'move',
+        x: validMoves[0].x,
+        y: validMoves[0].y
+    };
+}
+
+function findBestWallPlacement(room, playerNumber) {
+    const opponentNumber = playerNumber === 1 ? 2 : 1;
+    const opponentPos = room.board[`player${opponentNumber}`];
+    const opponentTargetY = opponentNumber === 1 ? 8 : 0;
+    
+    // Try to place walls that block opponent's path
+    const wallPlacements = [];
+    
+    // Generate potential wall placements near opponent
+    for (let x = Math.max(0, opponentPos.x - 2); x <= Math.min(7, opponentPos.x + 2); x++) {
+        for (let y = Math.max(0, opponentPos.y - 2); y <= Math.min(7, opponentPos.y + 2); y++) {
+            // Try horizontal walls
+            if (y < 8) {
+                wallPlacements.push({ x, y, orientation: 'horizontal' });
+            }
+            // Try vertical walls
+            if (x < 8) {
+                wallPlacements.push({ x, y, orientation: 'vertical' });
+            }
+        }
+    }
+    
+    // Filter valid wall placements
+    const validWalls = wallPlacements.filter(wall => 
+        room.isValidWallPlacement(wall.x, wall.y, wall.orientation)
+    );
+    
+    if (validWalls.length === 0) return null;
+    
+    // Prefer walls that increase opponent's path length
+    let bestWall = validWalls[0];
+    let maxPathIncrease = 0;
+    
+    for (const wall of validWalls.slice(0, 10)) { // Check only first 10 for performance
+        // Simulate wall placement
+        const tempWalls = [...room.walls, wall];
+        const pathLength = calculatePathLength(opponentPos, opponentTargetY, tempWalls);
+        
+        if (pathLength > maxPathIncrease) {
+            maxPathIncrease = pathLength;
+            bestWall = wall;
+        }
+    }
+    
+    return {
+        type: 'wall',
+        x: bestWall.x,
+        y: bestWall.y,
+        orientation: bestWall.orientation
+    };
+}
+
+function calculatePathLength(startPos, targetY, walls) {
+    const visited = new Set();
+    const queue = [{ x: startPos.x, y: startPos.y, distance: 0 }];
+    
+    while (queue.length > 0) {
+        const { x, y, distance } = queue.shift();
+        const key = `${x},${y}`;
+        
+        if (visited.has(key)) continue;
+        visited.add(key);
+        
+        if (y === targetY) return distance;
+        
+        const moves = [
+            { x: x, y: y - 1 },
+            { x: x, y: y + 1 },
+            { x: x - 1, y: y },
+            { x: x + 1, y: y }
+        ];
+        
+        for (const move of moves) {
+            if (move.x >= 0 && move.x < 9 && move.y >= 0 && move.y < 9 && 
+                !visited.has(`${move.x},${move.y}`) &&
+                !isPathBlockedByWalls(x, y, move.x, move.y, walls)) {
+                queue.push({ x: move.x, y: move.y, distance: distance + 1 });
+            }
+        }
+    }
+    return 999; // No path found
+}
+
+function isPathBlockedByWalls(x1, y1, x2, y2, walls) {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    
+    for (const wall of walls) {
+        if (wall.orientation === 'horizontal') {
+            if (dy !== 0) {
+                const wallY = wall.y;
+                const wallX1 = wall.x;
+                const wallX2 = wall.x + 1;
+                
+                if (dy > 0) {
+                    if (wallY === y1 && x1 >= wallX1 && x1 <= wallX2) {
+                        return true;
+                    }
+                } else {
+                    if (wallY === y1 - 1 && x1 >= wallX1 && x1 <= wallX2) {
+                        return true;
+                    }
+                }
+            }
+        } else {
+            if (dx !== 0) {
+                const wallX = wall.x;
+                const wallY1 = wall.y;
+                const wallY2 = wall.y + 1;
+                
+                if (dx > 0) {
+                    if (wallX === x1 && y1 >= wallY1 && y1 <= wallY2) {
+                        return true;
+                    }
+                } else {
+                    if (wallX === x1 - 1 && y1 >= wallY1 && y1 <= wallY2) {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    return false;
 }
 
 // REST API endpoints
